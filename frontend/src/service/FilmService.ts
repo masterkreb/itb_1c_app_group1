@@ -1,20 +1,13 @@
+import {Film} from "../types/types.ts";
+
+
 const baseUrl = "http://localhost:3000/film";
 
-// Types (optional, falls du sie brauchst)
+
+// Types
 export type FilmRating = "G" | "PG" | "PG-13" | "R" | "NC-17";
 
-export interface Film {
-    id: string;
-    title: string;
-    description: string;
-    release_year: string;
-    rental_duration: string;
-    rental_rate: string;
-    length: string;
-    replacement_cost: string;
-    rating: FilmRating | "";
-    special_features: string;
-}
+
 
 export async function getAllFilms(): Promise<Film[] | undefined> {
     console.log("Start getAllFilms");
@@ -32,6 +25,7 @@ export async function getAllFilms(): Promise<Film[] | undefined> {
     }
 
     const result = await response.json();
+    console.log(result);
     return result;
 }
 
@@ -73,6 +67,7 @@ export async function createFilm(film: Film): Promise<Film | undefined> {
     }
 
     const result = await response.json();
+    console.log("Successfully createFilm", result);
     return result;
 }
 

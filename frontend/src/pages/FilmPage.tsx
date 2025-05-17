@@ -3,8 +3,9 @@
 import React, {useEffect} from 'react';
 import {getAllFilms} from "../service/FilmService.ts";
 import {Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow} from "@mui/material";
-import {Film} from "../service/FilmService.ts";
+
 import {NavLink} from "react-router";
+import {Film} from "../types/types.ts";
 
 const FilmPage = () => {
     const [films, setFilms] = React.useState<Film[] | undefined>();

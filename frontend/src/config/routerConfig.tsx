@@ -4,6 +4,7 @@ import FilmPage from "../pages/FilmPage.tsx";
 import ActorPage from "../pages/ActorPage.tsx";
 import NotFoundPage from "../pages/NotFoundPage.tsx";
 import CategoryPage from "../pages/CategoryPage.tsx";
+import FilmFormular from "../pages/FilmFormular.tsx";
 
 export const router = createBrowserRouter([
     {
@@ -17,6 +18,10 @@ export const router = createBrowserRouter([
             {
                 path: "film",
                 element: <FilmPage />
+            },
+            {
+                path: "film/:id",
+                element: <FilmFormular />
             },
             {
                 path: "actor",

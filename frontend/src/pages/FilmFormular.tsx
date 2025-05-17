@@ -5,6 +5,9 @@ import {FormControl, InputLabel, Select, Stack, TextField} from "@mui/material";
 import Button from "@mui/material/Button";
 import JsonView from "@uiw/react-json-view";
 import MenuItem from "@mui/material/MenuItem";
+import {useParams} from "react-router";
+import {Film} from "../types/types.ts";
+import {getFilmById} from "../service/FilmService.ts";
 
 export enum FilmRating {
     G = "G",
@@ -14,24 +17,8 @@ export enum FilmRating {
     NC17 = "NC-17"
 }
 
-export interface InputType {
-    id: string;
-    title: string;
-    description: string;
-    release_year: string;
-    rental_duration: string;
-    rental_rate: string;
-    length: string;
-    replacement_cost: string;
-
-    rating: FilmRating | "";
-    special_features: string;
-}
-
-
-
 export type ValidationFieldset = {
-    [key in keyof Partial<InputType>]: {
+    [key in keyof Partial<Film>]: {
         validation?: {
             required?: boolean,
             minLength?: number,
@@ -43,8 +30,7 @@ export type ValidationFieldset = {
     };
 };
 
-const defaultInput: InputType = {
-    id: "",
+const defaultInput: Film = {
     title: "",
     description: "",
     release_year: "",
@@ -58,13 +44,6 @@ const defaultInput: InputType = {
 }
 
 const defaultValidation: ValidationFieldset = {
-
-    id: {validation: {
-            required: false,
-        },
-        valid: true
-    },
-
 
     title: {
         validation: {
@@ -139,14 +118,21 @@ const defaultValidation: ValidationFieldset = {
 }
 
 const FilmFormular = () => {
-    const [input, setInput] = React.useState<InputType>(defaultInput)
+    const [input, setInput] = React.useState<Film>(defaultInput)
     const [validation, setValidation] = React.useState<ValidationFieldset>(defaultValidation)
+    const param = useParams();
 
     useEffect(() => {
         console.log("Film Page mounted")
+        if(param.hasOwnProperty("id") && param.id)
+        {
+            getFilmById(param.id).then((film) => {
+                setInput(film ?? defaultInput)
+            })
+        }
     }, [])
 
-    function handleInputChanged(key: keyof InputType, value: unknown) {
+    function handleInputChanged(key: keyof Film, value: unknown) {
         setInput({
                 ...input,
                 [key]: value
@@ -164,8 +150,8 @@ const FilmFormular = () => {
         let formIsValid = true;
 
         Object.entries(input).forEach(([key, value]) => {
-            const keyField = key as keyof InputType;
-            const validationOptions: ValidationFieldset[keyof InputType] = validation[keyField];
+            const keyField = key as keyof Film;
+            const validationOptions: ValidationFieldset[keyof Film] = validation[keyField];
 
             if (validationOptions?.validation) {
                 if (validationOptions.validation.required && !value) {
@@ -226,9 +212,9 @@ const FilmFormular = () => {
                     <TextField
                         label="Film ID"
                         variant="standard"
-                        value={input.id}
+                        value={input.film_id}
                         onChange={(e) =>
-                            handleInputChanged("id", e.target.value)
+                            handleInputChanged("film_id", e.target.value)
                         }
                     />
                     <TextField
