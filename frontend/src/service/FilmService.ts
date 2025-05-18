@@ -109,6 +109,9 @@ export async function deleteFilm(id: string) {
     });
 
     console.log("DeleteFilm response:", response);
+    const errorText = await response.text();
+    console.error("DeleteFilm error body:", errorText);
+
 
     if (!response.ok) {
         console.error("Fehler beim Löschen vom Film:", response.status);
