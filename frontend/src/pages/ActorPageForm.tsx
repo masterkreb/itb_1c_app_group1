@@ -1,16 +1,19 @@
 // noinspection JSUnusedLocalSymbols
 
 import React, {useEffect} from 'react';
-import {Stack, TextField} from "@mui/material";
+import {Stack, TextField, FormControl, InputLabel, Select, MenuItem} from "@mui/material";
 import Button from "@mui/material/Button";
 import JsonView from "@uiw/react-json-view";
 import { useParams, useNavigate } from "react-router";
-import { getActorById, createActor, updateActor } from "../service/ActorService";
+import { getActorById, createActor, updateActor, addFilmToActor, removeFilmFromActor } from "../service/ActorService";
+import { Film } from "../types/types";
+import { getAllFilms } from "../service/FilmService";
 
 export interface InputType {
     actor_id: string;
     first_name: string;
     last_name: string;
+    films?: Film[];
 }
 
 export type ValidationFieldset = {
@@ -71,10 +74,15 @@ const ActorPageForm = () => {
     const navigate = useNavigate();
     const [input, setInput] = React.useState<InputType>(defaultInput)
     const [validation, setValidation] = React.useState<ValidationFieldset>(defaultValidation)
+    const [allFilms, setAllFilms] = React.useState<Film[]>([]);
+    const [selectedFilmId, setSelectedFilmId] = React.useState<string>("");
 
 
     useEffect(() => {
         console.log("Actor Page mounted")
+
+        loadAllFilms();
+
         if (id) {
             getActorById(id).then((data) => {
                 if (data) {
@@ -85,6 +93,11 @@ const ActorPageForm = () => {
             setInput(defaultInput); // leeren Zustand für "neu"
         }
     }, [id]);
+
+    async function loadAllFilms() {
+        const films = await getAllFilms();
+        setAllFilms(films);
+    }
 
     function handleInputChanged(key: keyof InputType, value: unknown) {
         setInput({
@@ -164,6 +177,41 @@ const ActorPageForm = () => {
         }
     }
 
+    async function handleAddFilm() {
+        if (!id || !selectedFilmId) return;
+
+        const success = await addFilmToActor(id, parseInt(selectedFilmId));
+        if (success) {
+            const film = allFilms.find(f => f.film_id === parseInt(selectedFilmId));
+            if (film && !input.films?.some(f => f.film_id === film.film_id)) {
+                setInput({
+                    ...input,
+                    films: [...(input.films || []), film],
+                });
+            }
+            setSelectedFilmId(""); // zurücksetzen
+        } else {
+            alert("Film konnte nicht verknüpft werden.");
+        }
+    }
+
+    async function handleRemoveFilm(filmId: number) {
+        if (!id) return;
+
+        const confirm = window.confirm("Filmverknüpfung wirklich entfernen?");
+        if (!confirm) return;
+
+        const success = await removeFilmFromActor(id, filmId);
+        if (success) {
+            setInput({
+                ...input,
+                films: input.films?.filter((f) => f.film_id !== filmId),
+            });
+        } else {
+            alert("Entfernen fehlgeschlagen.");
+        }
+    }
+
     return (
         <div>
             Actor Page
@@ -202,6 +250,51 @@ const ActorPageForm = () => {
                             handleInputChanged("last_name", e.target.value)
                         }
                     />
+
+                    <FormControl variant="standard" sx={{ minWidth: 200 }}>
+                        <InputLabel>Film hinzufügen</InputLabel>
+                        <Select
+                            value={selectedFilmId}
+                            onChange={(e) => setSelectedFilmId(e.target.value)}
+                            label="Film hinzufügen"
+                        >
+                            {allFilms.map((film) => (
+                                <MenuItem key={film.film_id} value={film.film_id.toString()}>
+                                    {film.title}
+                                </MenuItem>
+                            ))}
+                        </Select>
+                    </FormControl>
+
+                    <Button
+                        variant="outlined"
+                        onClick={handleAddFilm}
+                        disabled={!selectedFilmId}
+                    >
+                        Film verknüpfen
+                    </Button>
+
+                    {input.films && input.films.length > 0 && (
+                        <div>
+                            <h4>Verknüpfte Filme:</h4>
+                            <ul>
+                                {input.films.map((film) => (
+                                    <li key={film.film_id}>
+                                        {film.title}
+                                        <Button
+                                            size="small"
+                                            color="error"
+                                            variant="outlined"
+                                            style={{ marginLeft: "10px" }}
+                                            onClick={() => handleRemoveFilm(film.film_id)}
+                                        >
+                                            Entfernen
+                                        </Button>
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
+                    )}
 
                     <Button variant="contained" onClick={handleSaveClicked}> Save</Button>
                 </Stack>

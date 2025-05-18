@@ -18,6 +18,7 @@ const ActorPage = () => {
         console.log("Got actors from server: ", tempActors);
         setActors(tempActors);
         console.log("Ending GetActors")
+        console.log("Actor data:", actors);
     }
 
 
@@ -31,6 +32,7 @@ const ActorPage = () => {
                             <TableCell>ID</TableCell>
                             <TableCell>Vorname</TableCell>
                             <TableCell>Nachname</TableCell>
+                            <TableCell>Filme</TableCell>
                             <TableCell>Aktionen</TableCell>
                         </TableRow>
                     </TableHead>
@@ -44,12 +46,15 @@ const ActorPage = () => {
                                         <TableCell component="th" scope="row">{row.actor_id}</TableCell>
                                         <TableCell component="th" scope="row">{row.first_name}</TableCell>
                                         <TableCell>{row.last_name}</TableCell>
+                                        <TableCell>
+                                            {row.films?.map((f: any) => f.title).join(", ")}
+                                        </TableCell>
                                         <TableCell><NavLink to={"/actor/"+row.actor_id}>Details</NavLink></TableCell>
                                     </TableRow>
                                 ))
                             )
                             : <TableRow>
-                                <TableCell>Keine Schauspieler vorhanden</TableCell>
+                                <TableCell>Schauspieler laden...</TableCell>
                             </TableRow>}
                     </TableBody>
                 </Table>
