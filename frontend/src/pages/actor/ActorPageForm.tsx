@@ -3,7 +3,6 @@
 import React, {useEffect} from 'react';
 import {Stack, TextField, FormControl, InputLabel, Select, MenuItem} from "@mui/material";
 import Button from "@mui/material/Button";
-import JsonView from "@uiw/react-json-view";
 import { useParams, useNavigate } from "react-router";
 import { getActorById, createActor, updateActor, addFilmToActor, removeFilmFromActor } from "../../service/ActorService.ts";
 import { Film } from "../../types/types.ts";
@@ -287,8 +286,6 @@ const ActorPageForm = () => {
 
                     <Button variant="contained" onClick={handleSaveClicked}> Save</Button>
                 </Stack>
-                <JsonView value={input}/>
-                <JsonView value={validation}/>
             </Stack>
         </div>
     );
