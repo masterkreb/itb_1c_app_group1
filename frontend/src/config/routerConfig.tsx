@@ -1,13 +1,13 @@
 import {createBrowserRouter} from "react-router";
 import App from "../App.tsx";
 import FilmPage from "../pages/film/FilmPage.tsx";
-import ActorPage from "../pages/actor/ActorPage.tsx";
-import NotFoundPage from "../pages/NotFoundPage.tsx";
 import FilmDetailsPage from "../pages/film/FilmDetailsPage.tsx";
+import FilmPageForm from "../pages/film/FilmPageForm.tsx";
+import ActorPage from "../pages/actor/ActorPage.tsx";
 import ActorDetailsPage from "../pages/actor/ActorDetailsPage.tsx";
 import ActorPageForm from "../pages/actor/ActorPageForm.tsx";
-import FilmEditPage from "../pages/film/FilmEditPage.tsx";
-import FilmCreatePage from "../pages/film/FilmCreatePage.tsx";
+import NotFoundPage from "../pages/NotFoundPage.tsx";
+
 
 export const router = createBrowserRouter([
     {
@@ -27,12 +27,12 @@ export const router = createBrowserRouter([
                 element: <FilmDetailsPage />
             },
             {
-                path: "film/edit/:id",
-                element: <FilmEditPage />
+                path: "film/new",
+                element: <FilmPageForm />
             },
             {
-                path: "film/create/",
-                element: <FilmCreatePage />
+                path: "film/edit/:id",
+                element: <FilmPageForm />
             },
             {
                 path: "actor",
