@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router";
-import { getFilmById } from "../service/FilmService";
-import { updateFilm } from "../service/FilmService";
+
 import { useNavigate } from "react-router";
 import Typography from "@mui/material/Typography";
 import { Box, Stack, TextField } from "@mui/material";
 import Button from "@mui/material/Button";
+import {getFilmById, updateFilm} from "../../service/FilmService.ts";
 
 
 
