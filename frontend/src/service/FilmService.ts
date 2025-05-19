@@ -5,7 +5,7 @@ const baseUrl = "http://localhost:3000/film";
 
 
 // Types
-export type FilmRating = "G" | "PG" | "PG-13" | "R" | "NC-17";
+// export type FilmRating = "G" | "PG" | "PG-13" | "R" | "NC-17";
 
 
 
