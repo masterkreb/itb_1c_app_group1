@@ -1,4 +1,4 @@
-// noinspection JSUnusedLocalSymbols
+
 
 // @ts-ignore
 import React, { useEffect, useState } from 'react';
@@ -83,7 +83,7 @@ const FilmDetailsPage = () => {
             </TableContainer>
 
             <div style={{ marginTop: "20px", display: "flex", gap: "10px" }}>
-                <Button variant="contained" color="success" onClick={() => navigate("/film/create")}>+ Neuer Film</Button>
+                <Button variant="contained" color="success" onClick={() => navigate("/film/new")}>+ Neuer Film</Button>
                 <Button variant="contained" color="primary" onClick={handleEdit}>... Bearbeiten</Button>
                 <Button variant="contained" color="error" onClick={handleDelete}>X Löschen</Button>
             </div>
