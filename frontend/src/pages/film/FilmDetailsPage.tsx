@@ -3,7 +3,7 @@
 // @ts-ignore
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from "react-router";
-import { deleteFilm, getFilmById } from "../service/FilmService"; // Film-Service importieren
+import { deleteFilm, getFilmById } from "../../service/FilmService.ts"; // Film-Service importieren
 import {
     Button,
     Typography,

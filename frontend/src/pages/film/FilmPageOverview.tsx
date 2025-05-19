@@ -1,9 +1,9 @@
 // noinspection JSUnusedLocalSymbols
 
 import React, {useEffect} from 'react';
-import {getAllFilms} from "../service/FilmService.ts";
+import {getAllFilms} from "../../service/FilmService.ts";
 import {Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow} from "@mui/material";
-import {Film} from "../types/types.ts";
+import {Film} from "../../types/types.ts";
 import {NavLink} from "react-router";
 
 const FilmPage = () => {

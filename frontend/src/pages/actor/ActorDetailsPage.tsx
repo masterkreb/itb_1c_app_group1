@@ -3,9 +3,9 @@
 // @ts-ignore
 import React, { useEffect, useState } from 'react';
 import {useParams, useNavigate} from 'react-router';
-import { getActorById } from '../service/ActorService';
-import { deleteActor } from "../service/ActorService";
-import { Actor } from '../types/types';
+import { getActorById } from '../../service/ActorService.ts';
+import { deleteActor } from "../../service/ActorService.ts";
+import { Actor } from '../../types/types.ts';
 import {
     Button,
     Typography,

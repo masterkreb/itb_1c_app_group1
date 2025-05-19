@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router";
-import { getFilmById } from "../service/FilmService"; // Film holen
-import { updateFilm } from "../service/FilmService"; // Film aktualisieren
+import { getFilmById } from "../../service/FilmService.ts"; // Film holen
+import { updateFilm } from "../../service/FilmService.ts"; // Film aktualisieren
 import { useNavigate } from "react-router";
 
 

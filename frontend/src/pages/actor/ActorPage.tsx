@@ -1,9 +1,9 @@
 // noinspection JSUnusedLocalSymbols
 
 import React, {useEffect} from 'react';
-import {getAllActors} from "../service/ActorService.ts";
+import {getAllActors} from "../../service/ActorService.ts";
 import {Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow} from "@mui/material";
-import {Actor} from "../types/types.ts";
+import {Actor} from "../../types/types.ts";
 import {NavLink} from "react-router";
 
 const ActorPage = () => {

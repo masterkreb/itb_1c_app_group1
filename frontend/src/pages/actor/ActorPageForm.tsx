@@ -5,9 +5,9 @@ import {Stack, TextField, FormControl, InputLabel, Select, MenuItem} from "@mui/
 import Button from "@mui/material/Button";
 import JsonView from "@uiw/react-json-view";
 import { useParams, useNavigate } from "react-router";
-import { getActorById, createActor, updateActor, addFilmToActor, removeFilmFromActor } from "../service/ActorService";
-import { Film } from "../types/types";
-import { getAllFilms } from "../service/FilmService";
+import { getActorById, createActor, updateActor, addFilmToActor, removeFilmFromActor } from "../../service/ActorService.ts";
+import { Film } from "../../types/types.ts";
+import { getAllFilms } from "../../service/FilmService.ts";
 
 export interface InputType {
     actor_id: string;
@@ -259,7 +259,7 @@ const ActorPageForm = () => {
                             label="Film hinzufügen"
                         >
                             {allFilms.map((film) => (
-                                <MenuItem key={film.film_id} value={film.film_id.toString()}>
+                                <MenuItem key={film.film_id ?? 'undefined'} value={film.film_id?.toString() ?? 'undefined'}>
                                     {film.title}
                                 </MenuItem>
                             ))}
@@ -286,7 +286,7 @@ const ActorPageForm = () => {
                                             color="error"
                                             variant="outlined"
                                             style={{ marginLeft: "10px" }}
-                                            onClick={() => handleRemoveFilm(film.film_id)}
+                                            onClick={() => film.film_id !== undefined && handleRemoveFilm(film.film_id)}
                                         >
                                             Entfernen
                                         </Button>

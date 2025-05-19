@@ -1,5 +1,5 @@
 import React from "react";
-import {getAllFilms, getFilmById} from "../service/FilmService.ts";
+import {getAllFilms, getFilmById} from "../../service/FilmService.ts";
 import {Button, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow} from "@mui/material";
 import {NavLink, useNavigate} from "react-router";
 

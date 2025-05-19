@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router";
 import {TextField, Button, FormControl, Select, InputLabel} from "@mui/material";
-import { createFilm } from "../service/FilmService";
+import { createFilm } from "../../service/FilmService.ts";
 import MenuItem from "@mui/material/MenuItem";
 
 const FilmCreatePage = () => {
