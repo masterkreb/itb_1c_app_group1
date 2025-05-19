@@ -90,7 +90,7 @@ const ActorDetailsPage = () => {
                 <Button variant="contained" color="error" onClick={handleDelete}>
                     Löschen
                 </Button>
-                <Button variant="outlined" onClick={handleNew}>
+                <Button variant="contained" color="success" onClick={handleNew}>
                     Neuer Schauspieler
                 </Button>
             </div>

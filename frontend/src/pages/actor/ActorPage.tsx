@@ -2,7 +2,7 @@
 
 import React, {useEffect} from 'react';
 import {getActorById, getAllActors} from "../../service/ActorService.ts";
-import {Button, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow} from "@mui/material";
+import {Button, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField} from "@mui/material";
 import {Actor} from "../../types/types.ts";
 import {NavLink, useNavigate} from "react-router";
 
@@ -34,20 +34,14 @@ const ActorPage = () => {
 
     return (
         <div>
-            Actor Page
+            <h2>Actor Page</h2>
 
             <div style={{ margin: "20px 20px 30px 0", display: "flex", gap: "15px", alignItems: "center" }}>
-                <Button
-                    variant="contained"
-                    color="success"
-                    onClick={() => navigate("/actor/new")}
-                >
-                    Neuer Schauspieler
-                </Button>
 
-                <input
+                <TextField
                     placeholder="Actor ID eingeben"
                     inputMode="numeric"
+                    variant="standard"
                     value={searchId}
                     onChange={(e) => {
                         const val = e.target.value;
@@ -62,7 +56,15 @@ const ActorPage = () => {
                     color="primary"
                     onClick={handleSearch}
                 >
-                    Schauspieler suchen
+                    Suchen
+                </Button>
+
+                <Button
+                    variant="contained"
+                    color="success"
+                    onClick={() => navigate("/actor/new")}
+                >
+                    Neuer Schauspieler
                 </Button>
             </div>
             <TableContainer component={Paper}>

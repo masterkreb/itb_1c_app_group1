@@ -219,17 +219,6 @@ const ActorPageForm = () => {
                 <Stack spacing={2} justifyContent="flex-start" direction="column" alignItems="flex-start">
 
                     <TextField
-                        label="Actor ID"
-                        variant="standard"
-                        value={input.actor_id}
-                        error={!validation.actor_id?.valid}
-                        helperText={!validation.actor_id?.valid && validation.actor_id?.message}
-                        onChange={(e) =>
-                            handleInputChanged("actor_id", e.target.value)
-                        }
-                    />
-
-                    <TextField
                         label="Vorname"
                         variant="standard"
                         value={input.first_name}
