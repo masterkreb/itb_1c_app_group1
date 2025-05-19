@@ -106,7 +106,7 @@ export async function createActor(actorData: any): Promise<number> {
 export async function deleteActor(id: number): Promise<number> {
     const connection = db();
 
-    connection("film_actor")
+    await connection("film_actor")
         .where("actor_id", id)
         .delete();
 
