@@ -177,12 +177,12 @@ const FilmCreatePage = () => {
                         onChange={(e) => setLanguageId(e.target.value)}
                     >
                         <MenuItem value=""><em>Keine Sprache</em></MenuItem>
-                        <MenuItem value="1">English</MenuItem>
-                        <MenuItem value="2">Italian</MenuItem>
-                        <MenuItem value="3">Japanese</MenuItem>
+                        <MenuItem value="1">Englisch</MenuItem>
+                        <MenuItem value="2">Italienisch</MenuItem>
+                        <MenuItem value="3">Japanisch</MenuItem>
                         <MenuItem value="4">Mandarin</MenuItem>
-                        <MenuItem value="5">French</MenuItem>
-                        <MenuItem value="6">German</MenuItem>
+                        <MenuItem value="5">Französisch</MenuItem>
+                        <MenuItem value="6">Deutsch</MenuItem>
 
                     </Select>
                 </FormControl>

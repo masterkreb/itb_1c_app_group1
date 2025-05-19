@@ -57,7 +57,7 @@ const FilmDetailsPage = () => {
                 Details zu Film #{film.film_id}
             </Typography>
 
-            <TableContainer component={Paper} sx={{ maxWidth: 600 }}>
+            <TableContainer component={Paper} >
                 <Table>
                     <TableHead>
                         <TableRow>
