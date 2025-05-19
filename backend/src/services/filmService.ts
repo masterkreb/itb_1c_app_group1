@@ -112,6 +112,11 @@ export async function createFilm(filmData: any): Promise<number> {
 
 export async function deleteFilm(id: number): Promise<number> {
     const connection = db();
+
+    await connection("film_actor")
+        .where("film_id", id)
+        .delete();
+
     return connection("film")
         .where("film_id", id)
         .delete();
