@@ -3,8 +3,9 @@
 import React, {useEffect} from 'react';
 import {getAllFilms} from "../service/FilmService.ts";
 import {Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow} from "@mui/material";
-import {Film} from "../service/FilmService.ts";
+
 import {NavLink} from "react-router";
+import {Film} from "../types/types.ts";
 
 const FilmPage = () => {
     const [films, setFilms] = React.useState<Film[] | undefined>();
@@ -39,14 +40,14 @@ const FilmPage = () => {
                         {films ? (
                                 films.map((row) => (
                                     <TableRow
-                                        key={row.id}
+                                        key={row.film_id}
                                         sx={{'&:last-child td, &:last-child th': {border: 0}}}
                                     >
-                                        <TableCell component="th" scope="row">{row.id}</TableCell>
+                                        <TableCell component="th" scope="row">{row.film_id}</TableCell>
                                         <TableCell component="th" scope="row">{row.title}</TableCell>
                                         <TableCell>{row.rental_rate}</TableCell>
                                         <TableCell>{row.rental_duration}</TableCell>
-                                        <TableCell align="right"><NavLink to={"/film/"+row.id}>Details</NavLink></TableCell>
+                                        <TableCell align="right"><NavLink to={"/film/"+row.film_id}>Details</NavLink></TableCell>
                                     </TableRow>
                                 ))
                             )
