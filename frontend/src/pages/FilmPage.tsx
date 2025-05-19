@@ -74,7 +74,7 @@ const FilmPage = () => {
                         <TableRow>
                             <TableCell>ID</TableCell>
                             <TableCell>Titel</TableCell>
-                            <TableCell>Beschreibung</TableCell>
+
                             <TableCell>Actors</TableCell>
                             <TableCell>Aktionen</TableCell>
                         </TableRow>
@@ -90,7 +90,7 @@ const FilmPage = () => {
                                     >
                                         <TableCell component="th" scope="row">{row.film_id}</TableCell>
                                         <TableCell component="th" scope="row">{row.title}</TableCell>
-                                        <TableCell>{row.description}</TableCell>
+
                                         <TableCell>
                                             {row.actors && row.actors.length > 0
                                                 ? row.actors.map((a: any) => a.first_name + " " + a.last_name).join(", ")
