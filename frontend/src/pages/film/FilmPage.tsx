@@ -41,7 +41,7 @@ const FilmPage = () => {
                 <Button
                     variant="contained"
                     color="success"
-                    onClick={() => navigate("/film/create")}
+                    onClick={() => navigate("/film/new")}
                 >
                     Neuer Film
                 </Button>
@@ -80,7 +80,7 @@ const FilmPage = () => {
                         </TableRow>
                     </TableHead>
                     <TableBody>
-                        {/* films ? geht nicht bei leerer Liste, besser mit films.length > 0 */}
+
                         {films && films.length > 0 ? (
 
                                 films.map((row) => (
