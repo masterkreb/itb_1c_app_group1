@@ -27,7 +27,7 @@ const ActorDetailsPage = () => {
     const handleEdit = () => {
         navigate(`/actor/edit/${actor?.actor_id}`);
     };
-    console.log(actor)
+
     const handleDelete = async () => {
         const confirmDelete = window.confirm("Willst du diesen Schauspieler wirklich löschen?");
         if (confirmDelete && actor) {

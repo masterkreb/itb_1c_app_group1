@@ -37,7 +37,7 @@ const defaultInput: InputType = {
 const defaultValidation: ValidationFieldset = {
     actor_id: {
         validation: {
-            required: true,
+            required: false,
             minLength: 1,
             maxLength: 20,
         },
