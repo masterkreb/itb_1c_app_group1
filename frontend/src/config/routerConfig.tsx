@@ -1,13 +1,13 @@
 import {createBrowserRouter} from "react-router";
 import App from "../App.tsx";
-import FilmPage from "../pages/FilmPage.tsx";
-import ActorPage from "../pages/ActorPage.tsx";
+import FilmPage from "../pages/film/FilmPage.tsx";
+import ActorPage from "../pages/actor/ActorPage.tsx";
 import NotFoundPage from "../pages/NotFoundPage.tsx";
-import FilmDetailsPage from "../pages/FilmDetailsPage.tsx";
-import ActorDetailsPage from "../pages/ActorDetailsPage.tsx";
-import ActorPageForm from "../pages/ActorPageForm.tsx";
-import FilmEditPage from "../pages/FilmEditPage.tsx";
-import FilmCreatePage from "../pages/FilmCreatePage.tsx";
+import FilmDetailsPage from "../pages/film/FilmDetailsPage.tsx";
+import ActorDetailsPage from "../pages/actor/ActorDetailsPage.tsx";
+import ActorPageForm from "../pages/actor/ActorPageForm.tsx";
+import FilmEditPage from "../pages/film/FilmEditPage.tsx";
+import FilmCreatePage from "../pages/film/FilmCreatePage.tsx";
 
 export const router = createBrowserRouter([
     {
