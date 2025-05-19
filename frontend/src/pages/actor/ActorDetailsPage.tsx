@@ -6,22 +6,13 @@ import {useParams, useNavigate} from 'react-router';
 import { getActorById } from '../../service/ActorService.ts';
 import { deleteActor } from "../../service/ActorService.ts";
 import { Actor } from '../../types/types.ts';
-import {
-    Button,
-    Typography,
-    TableContainer,
-    Paper,
-    Table,
-    TableBody,
-    TableRow,
-    TableCell, TableHead
-} from '@mui/material';
+import {Button, Typography, TableContainer, Paper, Table, TableBody, TableRow, TableCell, TableHead} from '@mui/material';
+
 
 const ActorDetailsPage = () => {
     const { id } = useParams();
     const [actor, setActor] = useState<Actor | null>(null);
     const navigate = useNavigate();
-    console.log("Param actorId:", id);
 
     useEffect(() => {
         if (id) {
@@ -36,7 +27,7 @@ const ActorDetailsPage = () => {
     const handleEdit = () => {
         navigate(`/actor/edit/${actor?.actor_id}`);
     };
-    console.log(actor)
+
     const handleDelete = async () => {
         const confirmDelete = window.confirm("Willst du diesen Schauspieler wirklich löschen?");
         if (confirmDelete && actor) {
@@ -64,13 +55,14 @@ const ActorDetailsPage = () => {
                 Details zu Schauspieler #{actor.actor_id}
             </Typography>
 
-            <TableContainer component={Paper} sx={{ maxWidth: 500 }}>
-                <Table>
+            <TableContainer component={Paper}>
+                <Table sx={{minWidth: 650}} aria-label="simple table">
                     <TableHead>
                         <TableRow>
                             <TableCell>ID</TableCell>
                             <TableCell>Vorname</TableCell>
                             <TableCell>Nachname</TableCell>
+                            <TableCell>Filme</TableCell>
                         </TableRow>
                     </TableHead>
                     <TableBody>
@@ -78,6 +70,9 @@ const ActorDetailsPage = () => {
                             <TableCell>{actor.actor_id}</TableCell>
                             <TableCell>{actor.first_name}</TableCell>
                             <TableCell>{actor.last_name}</TableCell>
+                            <TableCell>
+                                {actor.films?.map((f: any) => f.title).join(", ")}
+                            </TableCell>
                         </TableRow>
                     </TableBody>
                 </Table>
@@ -90,7 +85,7 @@ const ActorDetailsPage = () => {
                 <Button variant="contained" color="error" onClick={handleDelete}>
                     Löschen
                 </Button>
-                <Button variant="outlined" onClick={handleNew}>
+                <Button variant="contained" color="success" onClick={handleNew}>
                     Neuer Schauspieler
                 </Button>
             </div>

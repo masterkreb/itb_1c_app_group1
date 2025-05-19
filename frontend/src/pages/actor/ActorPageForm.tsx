@@ -3,7 +3,6 @@
 import React, {useEffect} from 'react';
 import {Stack, TextField, FormControl, InputLabel, Select, MenuItem} from "@mui/material";
 import Button from "@mui/material/Button";
-import JsonView from "@uiw/react-json-view";
 import { useParams, useNavigate } from "react-router";
 import { getActorById, createActor, updateActor, addFilmToActor, removeFilmFromActor } from "../../service/ActorService.ts";
 import { Film } from "../../types/types.ts";
@@ -38,7 +37,7 @@ const defaultInput: InputType = {
 const defaultValidation: ValidationFieldset = {
     actor_id: {
         validation: {
-            required: true,
+            required: false,
             minLength: 1,
             maxLength: 20,
         },
@@ -170,7 +169,7 @@ const ActorPageForm = () => {
             : await createActor(input);
 
         if (success) {
-            setValidation(defaultValidation); // <--- HIER einfügen
+            setValidation(defaultValidation);
             navigate("/actor");
         } else {
             alert("Speichern fehlgeschlagen.");
@@ -217,17 +216,6 @@ const ActorPageForm = () => {
             Actor Page
             <Stack spacing={2} direction={"row"}>
                 <Stack spacing={2} justifyContent="flex-start" direction="column" alignItems="flex-start">
-
-                    <TextField
-                        label="Actor ID"
-                        variant="standard"
-                        value={input.actor_id}
-                        error={!validation.actor_id?.valid}
-                        helperText={!validation.actor_id?.valid && validation.actor_id?.message}
-                        onChange={(e) =>
-                            handleInputChanged("actor_id", e.target.value)
-                        }
-                    />
 
                     <TextField
                         label="Vorname"
@@ -298,8 +286,6 @@ const ActorPageForm = () => {
 
                     <Button variant="contained" onClick={handleSaveClicked}> Save</Button>
                 </Stack>
-                <JsonView value={input}/>
-                <JsonView value={validation}/>
             </Stack>
         </div>
     );
