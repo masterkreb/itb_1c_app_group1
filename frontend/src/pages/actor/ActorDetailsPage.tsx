@@ -14,14 +14,14 @@ import {
     Table,
     TableBody,
     TableRow,
-    TableCell, TableHead
+    TableCell,
+    TableHead
 } from '@mui/material';
 
 const ActorDetailsPage = () => {
     const { id } = useParams();
     const [actor, setActor] = useState<Actor | null>(null);
     const navigate = useNavigate();
-    console.log("Param actorId:", id);
 
     useEffect(() => {
         if (id) {

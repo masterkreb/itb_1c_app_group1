@@ -1,13 +1,16 @@
 // noinspection JSUnusedLocalSymbols
 
 import React, {useEffect} from 'react';
-import {getAllActors} from "../../service/ActorService.ts";
-import {Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow} from "@mui/material";
+import {getActorById, getAllActors} from "../../service/ActorService.ts";
+import {Button, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow} from "@mui/material";
 import {Actor} from "../../types/types.ts";
-import {NavLink} from "react-router";
+import {NavLink, useNavigate} from "react-router";
+
 
 const ActorPage = () => {
     const [actors, setActors] = React.useState<Actor[] | undefined>();
+    const [searchId, setSearchId] = React.useState("");
+    const navigate = useNavigate();
 
     useEffect(() => {
         getActors();
@@ -15,16 +18,53 @@ const ActorPage = () => {
 
     async function getActors() {
         const tempActors = await getAllActors();
-        console.log("Got actors from server: ", tempActors);
         setActors(tempActors);
-        console.log("Ending GetActors")
-        console.log("Actor data:", actors);
     }
 
+    const handleSearch = async () => {
+        if (!searchId.trim()) return;
+
+        const actor = await getActorById(searchId);
+        if (actor) {
+            navigate(`/actor/${searchId}`);
+        } else {
+            alert("Schauspieler mit dieser ID wurde nicht gefunden.");
+        }
+    };
 
     return (
         <div>
             Actor Page
+
+            <div style={{ margin: "20px 20px 30px 0", display: "flex", gap: "15px", alignItems: "center" }}>
+                <Button
+                    variant="contained"
+                    color="success"
+                    onClick={() => navigate("/actor/new")}
+                >
+                    Neuer Schauspieler
+                </Button>
+
+                <input
+                    placeholder="Actor ID eingeben"
+                    inputMode="numeric"
+                    value={searchId}
+                    onChange={(e) => {
+                        const val = e.target.value;
+                        if (/^\d*$/.test(val)) {
+                            setSearchId(val);
+                        }
+                    }}
+                />
+
+                <Button
+                    variant="outlined"
+                    color="primary"
+                    onClick={handleSearch}
+                >
+                    Schauspieler suchen
+                </Button>
+            </div>
             <TableContainer component={Paper}>
                 <Table sx={{minWidth: 650}} aria-label="simple table">
                     <TableHead>
