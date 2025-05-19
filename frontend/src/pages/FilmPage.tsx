@@ -76,10 +76,11 @@ const FilmPage = () => {
                             <TableCell>Titel</TableCell>
                             <TableCell>Beschreibung</TableCell>
                             <TableCell>Actors</TableCell>
-
+                            <TableCell>Aktionen</TableCell>
                         </TableRow>
                     </TableHead>
                     <TableBody>
+                        {/* films ? geht nicht bei leerer Liste, besser mit films.length > 0 */}
                         {films && films.length > 0 ? (
 
                                 films.map((row) => (
