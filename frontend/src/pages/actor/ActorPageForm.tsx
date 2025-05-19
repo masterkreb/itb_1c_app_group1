@@ -170,7 +170,7 @@ const ActorPageForm = () => {
             : await createActor(input);
 
         if (success) {
-            setValidation(defaultValidation); // <--- HIER einfügen
+            setValidation(defaultValidation);
             navigate("/actor");
         } else {
             alert("Speichern fehlgeschlagen.");
