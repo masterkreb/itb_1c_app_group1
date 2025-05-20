@@ -1,12 +1,27 @@
 // noinspection JSUnusedLocalSymbols
 
 import React, {useEffect} from 'react';
-import {getActorById, getAllActors} from "../../service/ActorService.ts";
-import {Button, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField} from "@mui/material";
-import {Actor} from "../../types/types.ts";
 import {NavLink, useNavigate} from "react-router";
+import {getActorById, getAllActors} from "../../service/ActorService.ts";
+import {Actor} from "../../types/types.ts";
+import {Button, Paper, Table, TableBody, TableContainer, TableHead, TableRow, TextField, TableCell} from "@mui/material";
 
+/**
+ * Funktion die, die Actor Page rendert und im Router dem path /actor zugewiesen wird.
+ * @returns:
+ * - Eine Tabelle aller Schauspieler inkl. ID, Vorname, Nachname und den verknüpften Filmen.
+ * - Eine Suchleiste mit Button um einen bestimmten Schauspieler über die ID zu öffnen.
+ * - Einen Button um einen neuen Schauspieler zu erfassen (navigiert zu /actor/new).
+ *
+ * State Variablen:
+ * - `actors`: Speichert eine Liste aller Actor Objekte.
+ * - `searchId`: Überblickt den User Input in der Suchleiste.
 
+ * Methods:
+ * - `getActors`: Fetches all actors from the backend and updates the `actors` state.
+ * - `handleSearch`: Searches for an actor by their ID using the current value of `searchId`.
+ *   Navigates to the actor's detailed page upon finding a match or displays an alert if no match is found.
+ */
 const ActorPage = () => {
     const [actors, setActors] = React.useState<Actor[] | undefined>();
     const [searchId, setSearchId] = React.useState("");
