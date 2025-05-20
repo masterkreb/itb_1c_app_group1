@@ -1,5 +1,9 @@
 const baseUrl = "http://localhost:3000/actor";
 
+/**
+ * Lädt Liste aller Actor.
+ * @returns Ein Array mit allen Schauspieler oder undefined bei Fehler
+ */
 export async function getAllActors() {
     console.log("Start GetActors")
 
@@ -16,7 +20,9 @@ export async function getAllActors() {
     }
 
     const tempActors = await response.json();
+    console.log("Got actors from server: ", tempActors.data)
     return tempActors.data;
+
 }
 
 /**
@@ -47,6 +53,8 @@ export async function getActorById(id: string) {
 
 /**
  * Erstellt einen neuen Schauspieler.
+ * @param actor Schauspieler-Objekt mit beliebiger Struktur
+ * @returns id vom neu erstellten Schauspieler oder false bei Fehler
  */
 export async function createActor(actor: object) {
     console.log("Start CreateActor");
@@ -67,11 +75,15 @@ export async function createActor(actor: object) {
     }
 
     const result = await response.json();
+    console.log("Created actor: ", result.id);
     return result.id;
 }
 
 /**
  * Aktualisiert einen bestehenden Schauspieler.
+ * @param id ID des zu bearbeitenden Schauspieler
+ * @param actor Schauspieler-Objekt mit beliebiger Struktur
+ * @returns true wenn die Änderung erfolgreich war und false bei Fehler
  */
 export async function updateActor(id: string, actor: object) {
     console.log("Start UpdateActor");
@@ -96,6 +108,8 @@ export async function updateActor(id: string, actor: object) {
 
 /**
  * Löscht einen Schauspieler anhand der ID.
+ * @param id ID des zu löschenden Schauspieler
+ * @returns true wenn die Löschung erfolgreich war und false bei Fehler
  */
 export async function deleteActor(id: string) {
     console.log("Start DeleteActor");
