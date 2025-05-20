@@ -1,9 +1,9 @@
-
+// noinspection JSUnusedLocalSymbols
 
 // @ts-ignore
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from "react-router";
-import {deleteFilm, getFilmById, removeActorFromFilm} from "../../service/FilmService.ts"; // Film-Service importieren
+import {deleteFilm, getFilmById} from "../../service/FilmService.ts"; // Film-Service importieren
 import {
     Button,
     Typography,
@@ -16,6 +16,17 @@ import {
     TableHead
 } from '@mui/material';
 
+/**
+ * Funktion die die Detail-Seite eines Films rendert.
+ *
+ * @returns:
+ * - Zeigt Filminformationen (ID, Titel, Beschreibung, Rating, Schauspieler).
+ * - Bietet Buttons für Bearbeiten, Löschen und neuen Film erfassen.
+ *
+ * State Variablen:
+ * - `film`: Speichert das aktuelle Filmobjekt.
+ */
+
 const FilmDetailsPage = () => {
     const {id} = useParams();
     const [film, setFilm] = useState<any>(null);
@@ -26,18 +37,8 @@ const FilmDetailsPage = () => {
     };
 
     const handleDelete = async () => {
-        console.log("Löschen gestartet für Film:", film.film_id);
-
         const confirmDelete = window.confirm("Willst du diesen Film wirklich löschen?");
         if (confirmDelete && film) {
-            if (film.actors && film.actors.length > 0) {
-                for (const actor of film.actors) {
-                    if (actor.actor_id) {
-                        await removeActorFromFilm(film.film_id, actor.actor_id);
-                    }
-                }
-            }
-
             const success = await deleteFilm(film.film_id.toString());
             if (success) {
                 navigate("/film");
@@ -46,6 +47,10 @@ const FilmDetailsPage = () => {
             }
         }
     };
+
+
+
+
 
     useEffect(() => {
         if (id) {
