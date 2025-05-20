@@ -1,5 +1,11 @@
 const baseUrl = "http://localhost:3000/film"; // Basis-URL für Filme
 
+/**
+ * Holt alle Filme vom Server.
+ *
+ * @returns {Promise<Film[]>} Liste von allen Filmen mit Details
+ */
+
 export async function getAllFilms() {
     console.log("Start GetAllFilms");
 
@@ -23,9 +29,11 @@ export async function getAllFilms() {
 
 /**
  * Holt einen bestimmten Film anhand der ID.
- * @param id
- * @returns
+ *
+ * @param {string} id - Die Film-ID
+ * @returns {Promise<Film | null>} Der Film oder null wenn nicht gefunden
  */
+
 export async function getFilmById(id: string) {
     console.log("Start GetFilmById");
 
@@ -48,8 +56,12 @@ export async function getFilmById(id: string) {
 }
 
 /**
- * Erstellt einen neuen Film.
+ * Sendet neue Filmdaten an den Server, um einen neuen Film zu erstellen.
+ *
+ * @param {object} film - Die Filmdaten im JSON-Format
+ * @returns {Promise<boolean>} true wenn erfolgreich, sonst false
  */
+
 export async function createFilm(film: object) {
     console.log("Start CreateFilm");
 
