@@ -4,9 +4,9 @@ import React, {useEffect} from 'react';
 import {Stack, TextField, FormControl, InputLabel, Select, MenuItem, Box, Typography} from "@mui/material";
 import Button from "@mui/material/Button";
 import { useParams, useNavigate } from "react-router";
-import { getActorById, createActor, updateActor, addFilmToActor, removeFilmFromActor } from "../../service/ActorService.ts";
+import { getActorById, createActor, updateActor} from "../../service/ActorService.ts";
 import { Film } from "../../types/types.ts";
-import { getAllFilms } from "../../service/FilmService.ts";
+import { getAllFilms, removeActorFromFilm, addActorToFilm } from "../../service/FilmService.ts";
 
 export interface InputType {
     actor_id: string;
@@ -180,7 +180,7 @@ const ActorPageForm = () => {
     async function handleAddFilm() {
         if (!id || !selectedFilmId) return;
 
-        const success = await addFilmToActor(id, parseInt(selectedFilmId));
+        const success = await addActorToFilm(parseInt(selectedFilmId), parseInt(id));
         if (success) {
             const film = allFilms.find(f => f.film_id === parseInt(selectedFilmId));
             if (film && !input.films?.some(f => f.film_id === film.film_id)) {
@@ -201,7 +201,7 @@ const ActorPageForm = () => {
         const confirm = window.confirm("Filmverknüpfung wirklich entfernen?");
         if (!confirm) return;
 
-        const success = await removeFilmFromActor(id, filmId);
+        const success = await removeActorFromFilm(filmId, parseInt(id));
         if (success) {
             setInput({
                 ...input,

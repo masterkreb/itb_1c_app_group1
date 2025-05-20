@@ -120,3 +120,39 @@ export async function deleteFilm(id: string) {
 
     return true;
 }
+
+export async function addActorToFilm(id: number, actorId: number): Promise<boolean> {
+    console.log("Start addActorToFilm");
+
+    const response = await fetch(`http://localhost:3000/film/${id}/actor/${actorId}`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        }
+    });
+
+    if (!response.ok) {
+        console.error("Fehler beim Verknüpfen (POST):", response.status);
+        return false;
+    }
+
+    return true;
+}
+
+export async function removeActorFromFilm(id: number, actorId: number): Promise<boolean> {
+    console.log("Start removeActorFromFilm");
+
+    const response = await fetch(`http://localhost:3000/film/${id}/actor/${actorId}`, {
+        method: "DELETE",
+        headers: {
+            "Content-Type": "application/json"
+        }
+    });
+
+    if (!response.ok) {
+        console.error("Fehler beim Entfernen (DELETE):", response.status);
+        return false;
+    }
+
+    return true;
+}
