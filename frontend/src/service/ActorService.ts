@@ -66,7 +66,8 @@ export async function createActor(actor: object) {
         return false;
     }
 
-    return true;
+    const result = await response.json();
+    return result.id;
 }
 
 /**
@@ -110,42 +111,6 @@ export async function deleteActor(id: string) {
 
     if (!response.ok) {
         console.error("Error while deleting actor: ", response.status);
-        return false;
-    }
-
-    return true;
-}
-
-export async function addFilmToActor(id: string, filmId: number): Promise<boolean> {
-    console.log("Start addFilmToActor");
-
-    const response = await fetch(`http://localhost:3000/actor/${id}/film/${filmId}`, {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-        },
-    });
-
-    if (!response.ok) {
-        console.error("Fehler beim Verknüpfen von Film:", response.status);
-        return false;
-    }
-
-    return true;
-}
-
-export async function removeFilmFromActor(id: string, filmId: number): Promise<boolean> {
-    console.log("Start removeFilmFromActor");
-
-    const response = await fetch(`http://localhost:3000/actor/${id}/film/${filmId}`, {
-        method: "DELETE",
-        headers: {
-            "Content-Type": "application/json",
-        },
-    });
-
-    if (!response.ok) {
-        console.error("Fehler beim Entfernen des Films:", response.status);
         return false;
     }
 

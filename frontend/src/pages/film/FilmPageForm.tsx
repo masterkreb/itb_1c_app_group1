@@ -113,10 +113,12 @@ const FilmPageForm = () => {
                         language_id: String(data.language_id),
                         actors: data.actors || []
                     });
+                    setValidation(defaultValidation);
                 }
             });
         } else {
             setInput({ ...defaultInput }); // leeren Zustand für "neu"
+            setValidation(defaultValidation);
         }
     }, [id]);
 

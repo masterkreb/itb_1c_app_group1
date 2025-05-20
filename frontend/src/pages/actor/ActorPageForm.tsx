@@ -189,7 +189,7 @@ const ActorPageForm = () => {
                     films: [...(input.films || []), film],
                 });
             }
-            setSelectedFilmId(""); // zurücksetzen
+            setSelectedFilmId("");
         } else {
             alert("Film konnte nicht verknüpft werden.");
         }
@@ -209,6 +209,22 @@ const ActorPageForm = () => {
             });
         } else {
             alert("Entfernen fehlgeschlagen.");
+        }
+    }
+
+    async function handleCreateAndNavigate() {
+        if (!validateForm()) {
+            return;
+        }
+
+        if (!id) {
+            const newActorId = await createActor(input); // gibt ID zurück
+
+            if (newActorId) {
+                navigate(`/actor/edit/${newActorId}`);
+            } else {
+                alert("Erstellung fehlgeschlagen.");
+            }
         }
     }
 
@@ -248,50 +264,62 @@ const ActorPageForm = () => {
                     <Typography variant="h5" gutterBottom>
                         Verknüpfte Filme
                     </Typography>
-
-                    <Stack spacing={2} mb={3}>
-                        <FormControl sx={{ minWidth: 200 }}>
-                            <InputLabel>Film hinzufügen</InputLabel>
-                            <Select
-                                value={selectedFilmId}
-                                onChange={(e) => setSelectedFilmId(e.target.value)}
-                                label="Film hinzufügen"
+                    {id && (
+                        <Stack spacing={2} mb={3}>
+                            <FormControl sx={{ minWidth: 200 }}>
+                                <InputLabel>Film hinzufügen</InputLabel>
+                                <Select
+                                    value={selectedFilmId}
+                                    onChange={(e) => setSelectedFilmId(e.target.value)}
+                                    label="Film hinzufügen"
+                                >
+                                    {allFilms.map((film) => (
+                                        <MenuItem key={film.film_id ?? 'undefined'} value={film.film_id?.toString() ?? 'undefined'}>
+                                            {film.title}
+                                        </MenuItem>
+                                    ))}
+                                </Select>
+                            </FormControl>
+                            <Button
+                                variant="outlined"
+                                onClick={handleAddFilm}
+                                disabled={!selectedFilmId}
                             >
-                                {allFilms.map((film) => (
-                                    <MenuItem key={film.film_id ?? 'undefined'} value={film.film_id?.toString() ?? 'undefined'}>
-                                        {film.title}
-                                    </MenuItem>
-                                ))}
-                            </Select>
-                        </FormControl>
+                                Film verknüpfen
+                            </Button>
+                        </Stack>
+                    )}
+                    {id && (
+                        <Stack spacing={1}>
+                            {input.films && input.films.length > 0 ? (
+                                input.films.map((film: any) => (
+                                    <Stack key={film.film_id} direction="row" spacing={2} alignItems="center">
+                                        <span>{film.title}</span>
+                                        <Button
+                                            variant="outlined"
+                                            color="error"
+                                            size="small"
+                                            onClick={() => handleRemoveFilm(film.film_id)}
+                                        >
+                                            Entfernen
+                                        </Button>
+                                    </Stack>
+                                ))
+                            ) : (
+                                <Typography color="text.secondary">Noch keine Filme hinzugefügt</Typography>
+                            )}
+                        </Stack>
+                    )}
+                    {!id && (
                         <Button
                             variant="outlined"
-                            onClick={handleAddFilm}
-                            disabled={!selectedFilmId}
+                            color="primary"
+                            onClick={handleCreateAndNavigate}
                         >
-                            Film verknüpfen
+                            Schauspieler verknüpfen
                         </Button>
-                    </Stack>
+                    )}
 
-                    <Stack spacing={1}>
-                        {input.films && input.films.length > 0 ? (
-                            input.films.map((film: any) => (
-                                <Stack key={film.film_id} direction="row" spacing={2} alignItems="center">
-                                    <span>{film.title}</span>
-                                    <Button
-                                        variant="outlined"
-                                        color="error"
-                                        size="small"
-                                        onClick={() => handleRemoveFilm(film.film_id)}
-                                    >
-                                        Entfernen
-                                    </Button>
-                                </Stack>
-                            ))
-                        ) : (
-                            <Typography color="text.secondary">Noch keine Filme hinzugefügt</Typography>
-                        )}
-                    </Stack>
 
 
                 </Box>
