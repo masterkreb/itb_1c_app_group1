@@ -46,7 +46,7 @@ const ActorDetailsPage = () => {
 
 
     if (!actor) {
-        return <div>Schauspieler wird geladen...</div>;
+        return <div>Schauspieler nicht gefunden...</div>;
     }
 
     return (
