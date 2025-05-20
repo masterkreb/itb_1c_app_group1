@@ -116,10 +116,10 @@ export async function deleteActor(id: string) {
     return true;
 }
 
-export async function addFilmToActor(actorId: string, filmId: number): Promise<boolean> {
+export async function addFilmToActor(id: string, filmId: number): Promise<boolean> {
     console.log("Start addFilmToActor");
 
-    const response = await fetch(`http://localhost:3000/actor/${actorId}/film/${filmId}`, {
+    const response = await fetch(`http://localhost:3000/actor/${id}/film/${filmId}`, {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
@@ -134,10 +134,10 @@ export async function addFilmToActor(actorId: string, filmId: number): Promise<b
     return true;
 }
 
-export async function removeFilmFromActor(actorId: string, filmId: number): Promise<boolean> {
+export async function removeFilmFromActor(id: string, filmId: number): Promise<boolean> {
     console.log("Start removeFilmFromActor");
 
-    const response = await fetch(`http://localhost:3000/actor/${actorId}/film/${filmId}`, {
+    const response = await fetch(`http://localhost:3000/actor/${id}/film/${filmId}`, {
         method: "DELETE",
         headers: {
             "Content-Type": "application/json",
