@@ -1,7 +1,22 @@
+// noinspection JSUnusedLocalSymbols
+
 import React from "react";
 import {getAllFilms, getFilmById} from "../../service/FilmService.ts";
 import {Button, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField} from "@mui/material";
 import {NavLink, useNavigate} from "react-router";
+
+/**
+ * Diese Komponente zeigt eine Übersicht aller Filme.
+ *
+ * @returns:
+ * - Eine Tabelle mit allen Filmen (ID, Titel, Schauspieler, Link zu Details)
+ * - Eine Suchleiste für Film-ID
+ * - Ein Button für neuen Film (navigiert zu /film/new)
+ *
+ * State Variablen:
+ * - `films`: Liste aller Filme
+ * - `searchId`: Eingabe für die Suche nach Film-ID
+ */
 
 const FilmPage = () => {
     const [films, setFilms] = React.useState<any[]>([]); // Liste von Filme, am Anfang leer
