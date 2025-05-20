@@ -1,6 +1,6 @@
 import React from "react";
 import {getAllFilms, getFilmById} from "../../service/FilmService.ts";
-import {Button, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow} from "@mui/material";
+import {Button, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField} from "@mui/material";
 import {NavLink, useNavigate} from "react-router";
 
 const FilmPage = () => {
@@ -38,17 +38,12 @@ const FilmPage = () => {
 
             {/* Film erstellen + Film suchen */}
             <div style={{ margin: "20px 20px 30px 0", display: "flex", gap: "15px", alignItems: "center" }}>
-                <Button
-                    variant="contained"
-                    color="success"
-                    onClick={() => navigate("/film/new")}
-                >
-                    Neuer Film
-                </Button>
 
-                <input
+
+                <TextField
                     placeholder="Film ID eingeben"
                     inputMode="numeric"
+                    variant="standard"
                     value={searchId}
                     onChange={(e) => {
                         const val = e.target.value;
@@ -63,7 +58,15 @@ const FilmPage = () => {
                     color="primary"
                     onClick={handleSearch}
                 >
-                    Film suchen
+                    Suchen
+                </Button>
+
+                <Button
+                    variant="contained"
+                    color="success"
+                    onClick={() => navigate("/film/new")}
+                >
+                    Neuer Film
                 </Button>
             </div>
 
