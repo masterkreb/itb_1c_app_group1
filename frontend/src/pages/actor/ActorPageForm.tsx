@@ -1,7 +1,7 @@
 // noinspection JSUnusedLocalSymbols
 
 import React, {useEffect} from 'react';
-import {Stack, TextField, FormControl, InputLabel, Select, MenuItem} from "@mui/material";
+import {Stack, TextField, FormControl, InputLabel, Select, MenuItem, Box, Typography} from "@mui/material";
 import Button from "@mui/material/Button";
 import { useParams, useNavigate } from "react-router";
 import { getActorById, createActor, updateActor, addFilmToActor, removeFilmFromActor } from "../../service/ActorService.ts";
@@ -70,6 +70,7 @@ const defaultValidation: ValidationFieldset = {
 
 const ActorPageForm = () => {
     const { id } = useParams();
+    const isEditMode = !!id;
     const navigate = useNavigate();
     const [input, setInput] = React.useState<InputType>(defaultInput)
     const [validation, setValidation] = React.useState<ValidationFieldset>(defaultValidation)
@@ -212,82 +213,90 @@ const ActorPageForm = () => {
     }
 
     return (
-        <div>
-            Actor Page
-            <Stack spacing={2} direction={"row"}>
-                <Stack spacing={2} justifyContent="flex-start" direction="column" alignItems="flex-start">
+        <Box sx={{ my: 4 }}>
+            <Stack direction="row" spacing={4} alignItems="flex-start">
+                <Box sx={{ flex: 1 }}>
+                    <Typography variant="h5" gutterBottom>
+                        {isEditMode ? "Schauspieler bearbeiten" : "Neuer Schauspieler"}
+                    </Typography>
+                    <Stack spacing={2}>
+                        <TextField
+                            label="Vorname"
+                            value={input.first_name}
+                            error={!validation.first_name?.valid}
+                            helperText={!validation.first_name?.valid && validation.first_name?.message}
+                            onChange={(e) =>
+                                handleInputChanged("first_name", e.target.value)
+                            }
+                        />
 
-                    <TextField
-                        label="Vorname"
-                        variant="standard"
-                        value={input.first_name}
-                        error={!validation.first_name?.valid}
-                        helperText={!validation.first_name?.valid && validation.first_name?.message}
-                        onChange={(e) =>
-                            handleInputChanged("first_name", e.target.value)
-                        }
-                    />
+                        <TextField
+                            label="Nachname"
+                            value={input.last_name}
+                            error={!validation.last_name?.valid}
+                            helperText={!validation.last_name?.valid && validation.last_name?.message}
+                            onChange={(e) =>
+                                handleInputChanged("last_name", e.target.value)
+                            }
+                        />
 
-                    <TextField
-                        label="Nachname"
-                        variant="standard"
-                        value={input.last_name}
-                        error={!validation.last_name?.valid}
-                        helperText={!validation.last_name?.valid && validation.last_name?.message}
-                        onChange={(e) =>
-                            handleInputChanged("last_name", e.target.value)
-                        }
-                    />
+                        <Button variant="contained" onClick={handleSaveClicked}>Speichern</Button>
+                    </Stack>
+                </Box>
 
-                    <FormControl variant="standard" sx={{ minWidth: 200 }}>
-                        <InputLabel>Film hinzufügen</InputLabel>
-                        <Select
-                            value={selectedFilmId}
-                            onChange={(e) => setSelectedFilmId(e.target.value)}
-                            label="Film hinzufügen"
-                        >
-                            {allFilms.map((film) => (
-                                <MenuItem key={film.film_id ?? 'undefined'} value={film.film_id?.toString() ?? 'undefined'}>
-                                    {film.title}
-                                </MenuItem>
-                            ))}
-                        </Select>
-                    </FormControl>
+                <Box sx={{ flex: 1 }}>
+                    <Typography variant="h5" gutterBottom>
+                        Verknüpfte Filme
+                    </Typography>
 
-                    <Button
-                        variant="outlined"
-                        onClick={handleAddFilm}
-                        disabled={!selectedFilmId}
-                    >
-                        Film verknüpfen
-                    </Button>
-
-                    {input.films && input.films.length > 0 && (
-                        <div>
-                            <h4>Verknüpfte Filme:</h4>
-                            <ul>
-                                {input.films.map((film) => (
-                                    <li key={film.film_id}>
+                    <Stack spacing={2} mb={3}>
+                        <FormControl sx={{ minWidth: 200 }}>
+                            <InputLabel>Film hinzufügen</InputLabel>
+                            <Select
+                                value={selectedFilmId}
+                                onChange={(e) => setSelectedFilmId(e.target.value)}
+                                label="Film hinzufügen"
+                            >
+                                {allFilms.map((film) => (
+                                    <MenuItem key={film.film_id ?? 'undefined'} value={film.film_id?.toString() ?? 'undefined'}>
                                         {film.title}
-                                        <Button
-                                            size="small"
-                                            color="error"
-                                            variant="outlined"
-                                            style={{ marginLeft: "10px" }}
-                                            onClick={() => film.film_id !== undefined && handleRemoveFilm(film.film_id)}
-                                        >
-                                            Entfernen
-                                        </Button>
-                                    </li>
+                                    </MenuItem>
                                 ))}
-                            </ul>
-                        </div>
-                    )}
+                            </Select>
+                        </FormControl>
+                        <Button
+                            variant="outlined"
+                            onClick={handleAddFilm}
+                            disabled={!selectedFilmId}
+                        >
+                            Film verknüpfen
+                        </Button>
+                    </Stack>
 
-                    <Button variant="contained" onClick={handleSaveClicked}> Save</Button>
-                </Stack>
+                    <Stack spacing={1}>
+                        {input.films && input.films.length > 0 ? (
+                            input.films.map((film: any) => (
+                                <Stack key={film.film_id} direction="row" spacing={2} alignItems="center">
+                                    <span>{film.title}</span>
+                                    <Button
+                                        variant="outlined"
+                                        color="error"
+                                        size="small"
+                                        onClick={() => handleRemoveFilm(film.film_id)}
+                                    >
+                                        Entfernen
+                                    </Button>
+                                </Stack>
+                            ))
+                        ) : (
+                            <Typography color="text.secondary">Noch keine Filme hinzugefügt</Typography>
+                        )}
+                    </Stack>
+
+
+                </Box>
             </Stack>
-        </div>
+        </Box>
     );
 };
 
