@@ -11,8 +11,9 @@ import {
     TextField,
     Typography
 } from "@mui/material";
-import { createFilm, getFilmById, updateFilm } from "../../service/FilmService";
+import {addActorToFilm, createFilm, getFilmById, removeActorFromFilm, updateFilm} from "../../service/FilmService";
 import {useEffect, useState} from "react";
+import {createActor} from "../../service/ActorService.ts";
 
 // Typdefinition für Film-Input
 export interface FilmInputType {
@@ -159,10 +160,30 @@ const FilmPageForm = () => {
      * Entfernt einen bestehenden Schauspieler aus der Schauspieler-Liste.
      * @param {number} actor_id - Die ID des zu entfernenden Schauspielers
      */
-    function handleRemoveActor(actor_id: number): void {
-        const updatedActors = input.actors.filter((a: any) => a.actor_id !== actor_id);
-        setInput({ ...input, actors: updatedActors });
+    async function handleRemoveActor(actor_id: number): Promise<void> {
+        if (!id) return;
+
+        const confirmed = window.confirm("Schauspieler wirklich entfernen?");
+        if (!confirmed) return;
+
+        const success = await removeActorFromFilm(parseInt(id), actor_id);
+        if (success) {
+            const updated = await getFilmById(id);
+            setInput({
+                ...updated,
+                release_year: String(updated.release_year),
+                length: String(updated.length),
+                rental_rate: String(updated.rental_rate),
+                rental_duration: String(updated.rental_duration),
+                replacement_cost: String(updated.replacement_cost),
+                language_id: String(updated.language_id),
+                actors: updated.actors || []
+            });
+        } else {
+            alert("Entfernen fehlgeschlagen.");
+        }
     }
+
 
 
     /**
@@ -253,14 +274,24 @@ const FilmPageForm = () => {
             ? await updateFilm(id, fullInput)
             : await createFilm(fullInput);
 
+        if (success && id) {
+            for (const actor of validActors) {
+                const actorCreated = await createActor(actor);
+                if (actorCreated && typeof actorCreated === "number") {
+                    await addActorToFilm(parseInt(id), actorCreated);
+                }
+            }
+        }
+
         if (success) {
-            // Validation-Zustand optional zurücksetzen:
             setValidation(defaultValidation);
             navigate("/film");
         } else {
             alert("Fehler beim Speichern.");
         }
     }
+
+
 
 
     return (
@@ -307,12 +338,23 @@ const FilmPageForm = () => {
                             helperText={!validation.length?.valid ? validation.length?.message : ""}
                             fullWidth
                         />
-                        <TextField
-                            label="Rating"
-                            value={input.rating}
-                            onChange={(e) => handleInputChanged("rating", e.target.value)}
-                            fullWidth
-                        />
+                        <FormControl fullWidth>
+                            <InputLabel id="rating-label">Rating</InputLabel>
+                            <Select
+                                labelId="rating-label"
+                                value={input.rating}
+                                label="Rating"
+                                onChange={(e) => handleInputChanged("rating", e.target.value)}
+                            >
+                                <MenuItem value=""><em>Kein Rating</em></MenuItem>
+                                <MenuItem value="G">G</MenuItem>
+                                <MenuItem value="PG">PG</MenuItem>
+                                <MenuItem value="PG-13">PG-13</MenuItem>
+                                <MenuItem value="R">R</MenuItem>
+                                <MenuItem value="NC-17">NC-17</MenuItem>
+                            </Select>
+                        </FormControl>
+
                         <TextField
                             label="Rental Rate"
                             type="number"

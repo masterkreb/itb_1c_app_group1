@@ -95,10 +95,15 @@ const FilmPage = () => {
                                         <TableCell component="th" scope="row">{row.title}</TableCell>
 
                                         <TableCell>
-                                            {row.actors && row.actors.length > 0
-                                                ? row.actors.map((a: any) => a.first_name + " " + a.last_name).join(", ")
+                                            {row.actors &&
+                                            row.actors.filter((a: any) => a.first_name && a.last_name).length > 0
+                                                ? row.actors
+                                                    .filter((a: any) => a.first_name && a.last_name)
+                                                    .map((a: any) => a.first_name + " " + a.last_name)
+                                                    .join(", ")
                                                 : "Keine Schauspieler vorhanden"}
                                         </TableCell>
+
 
                                         <TableCell align="right"><NavLink to={"/film/"+row.film_id}>Details</NavLink></TableCell>
                                     </TableRow>
