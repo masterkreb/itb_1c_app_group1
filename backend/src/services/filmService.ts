@@ -104,11 +104,22 @@ export async function getFilmById(id: number) {
 
 export async function createFilm(filmData: any): Promise<number> {
     const connection = db();
-    const result = await connection("film")
-        .insert(filmData);
+    const result = await connection("film").insert({
+        title: filmData.title,
+        description: filmData.description,
+        release_year: filmData.release_year,
+        rental_duration: filmData.rental_duration,
+        rental_rate: filmData.rental_rate,
+        length: filmData.length,
+        replacement_cost: filmData.replacement_cost,
+        rating: filmData.rating || "G",
+        special_features: filmData.special_features || "Trailers",
+        language_id: filmData.language_id || 1
+    });
     console.log("Created film with result:", result);
     return result[0];
 }
+
 
 export async function deleteFilm(id: number): Promise<number> {
     const connection = db();
