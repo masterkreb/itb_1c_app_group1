@@ -16,11 +16,6 @@ import {Button, Paper, Table, TableBody, TableContainer, TableHead, TableRow, Te
  * State Variablen:
  * - `actors`: Speichert eine Liste aller Actor Objekte.
  * - `searchId`: Überblickt den User Input in der Suchleiste.
-
- * Methods:
- * - `getActors`: Fetches all actors from the backend and updates the `actors` state.
- * - `handleSearch`: Searches for an actor by their ID using the current value of `searchId`.
- *   Navigates to the actor's detailed page upon finding a match or displays an alert if no match is found.
  */
 const ActorPage = () => {
     const [actors, setActors] = React.useState<Actor[] | undefined>();
