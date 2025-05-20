@@ -91,6 +91,20 @@ const defaultValidation: ValidationFieldset = {
     }
 };
 
+/**
+ * Diese Komponente zeigt ein Formular zum Erstellen oder Bearbeiten eines Films.
+ *
+ * @returns:
+ * - Eingabefelder für Film-Informationen (z. B. Titel, Beschreibung, Länge, Rating usw.)
+ * - Eingabefelder für neue Schauspieler
+ * - Button zum Speichern
+ *
+ * State Variablen:
+ * - `input`: Hält die Formulardaten für den Film
+ * - `validation`: Validierungsstatus für Pflichtfelder
+ * - `newActorInputs`: Neue Schauspieler zum Hinzufügen
+ */
+
 const FilmPageForm = () => {
     const { id } = useParams();
     const isEditMode = !!id; // prüfen ob edit oder neu
@@ -260,19 +274,21 @@ const FilmPageForm = () => {
 
         const validActors = newActorInputs.filter(a => a.first_name.trim() && a.last_name.trim());
 
-        const fullInput = {
-            ...input,
-            actors: [
-                ...input.actors.filter((a: any) => a.actor_id),
-                ...validActors
-            ]
-        };
+        const sanitizedInput = Object.fromEntries(
+            Object.entries({
+                ...input,
+                actors: [...input.actors.filter((a: any) => a.actor_id), ...validActors]
+            }).map(([key, val]) => [key, val === "" ? undefined : val])
+        );
 
-        delete fullInput.film_id;
+        delete sanitizedInput.film_id;
+        console.log("GÖNDERİLEN VERİ:", sanitizedInput);
+
 
         const success = id
-            ? await updateFilm(id, fullInput)
-            : await createFilm(fullInput);
+            ? await updateFilm(id, sanitizedInput)
+            : await createFilm(sanitizedInput);
+
 
         if (success && id) {
             for (const actor of validActors) {
