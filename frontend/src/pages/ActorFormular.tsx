@@ -1,47 +1,48 @@
-import {Stack, TextField} from "@mui/material";
-import Button from "@mui/material/Button";
+// frontend/src/pages/ActorFormular.tsx
 
-import React, {useEffect} from "react";
+import React, { useEffect, useState } from "react";
+import {Stack, TextField, Button, Typography,
+FormControl, InputLabel, Select, MenuItem, SelectChangeEvent } from "@mui/material";
+import JsonView from "@uiw/react-json-view";
+import { useParams, useNavigate } from "react-router-dom";
+import {
+    getActorById,
+    createActor,
+    updateActor
+} from "../service/ActorService";
+import { getAllFilms } from "../service/FilmService";  // ← neu
+import { Film } from "../types/types";                 // ← neu
 
-
+// Eingabe-Typ für das Formular
 export interface InputType {
     id: string;
     first_name: string;
     last_name: string;
-
 }
 
+// Default-Werte für das Formular (Create-Modus)
+const defaultInput: InputType = {
+    id: "",
+    first_name: "",
+    last_name: ""
+};
+
+// Validation-Setup (unverändert)
 export type ValidationFieldset = {
     [key in keyof Partial<InputType>]: {
         validation?: {
-            required?: boolean,
-            minLength?: number,
-            maxLength?: number,
-            pattern?: RegExp,
-        },
-        message?: string,
-        valid: boolean,
+            required?: boolean;
+            minLength?: number;
+            maxLength?: number;
+            pattern?: RegExp;
+        };
+        message?: string;
+        valid: boolean;
     };
 };
 
-
-const defaultInput: InputType = {
-
-
-    id: "",
-    first_name: "",
-    last_name: "",
-
-
-}
-
 const defaultValidation: ValidationFieldset = {
-    id: {
-        validation: {
-            required: false,
-        },
-        valid: true
-    },
+    id: { validation: { required: false }, valid: true },
     first_name: {
         validation: {
             required: true,
@@ -60,129 +61,231 @@ const defaultValidation: ValidationFieldset = {
         },
         valid: true
     }
-}
+};
 
+const ActorFormular: React.FC = () => {
+    // ① Lese die ID aus der URL: wenn vorhanden, bist du im Edit-Modus
+    const { id } = useParams<{ id: string }>();
+    // ② Hook zum Navigieren nach Save oder Cancel
+    const navigate = useNavigate();
 
-const ActorFormular = () => {
-    const [input, setInput] = React.useState<InputType>(defaultInput)
-    const [validation, setValidation] = React.useState<ValidationFieldset>(defaultValidation)
+    // Form- und Validation-State
+    const [input, setInput] = useState<InputType>(defaultInput);
+    const [validation, setValidation] = useState<ValidationFieldset>(defaultValidation);
 
+    // === NEU: State für Filme & Auswahl ===
+    const [allFilms, setAllFilms] = useState<Film[]>([]);
+    const [selectedFilms, setSelectedFilms] = useState<number[]>([]);
+
+    // ③ Beim ersten Render: lade Filme und ggf. bestehenden Actor
     useEffect(() => {
-        console.log("Film Page mounted")
-    }, [])
+        // Filme laden für Multi-Select
+        getAllFilms().then(films => {
+            if (films) setAllFilms(films);
+        });
 
+        // Actor laden
+        if (id) {
+            getActorById(id).then(actor => {
+                if (actor) {
+                    // Input befüllen
+                    setInput({
+                        id: actor.actor_id.toString(),
+                        first_name: actor.first_name,
+                        last_name: actor.last_name
+                    });
+                    // falls actor.films mitkommt, initiale Auswahl setzen
+                    if (actor.films) {
+                        setSelectedFilms(actor.films.map(f => f.film_id!));
+                    }
+                }
+            });
+        }
+    }, [id]);
+
+    // Handler für alle TextField-Änderungen
     function handleInputChanged(key: keyof InputType, value: unknown) {
-        setInput({
-                ...input,
-                [key]: value
-            }
-        );
+        setInput(prev => ({ ...prev, [key]: value as string }));
     }
 
-    /**
-     * Validates the input form based on the specified validation rules for each field.
-     * Updates the validation state with validation messages and status for each field.
-     *
-     * @return {boolean} Returns true if the form is valid, otherwise returns false.
-     */
+    // Formular-Validation (bleibt unverändert)
     function validateForm(): boolean {
         let formIsValid = true;
-
         Object.entries(input).forEach(([key, value]) => {
-            const keyField = key as keyof InputType;
-            const validationOptions: ValidationFieldset[keyof InputType] = validation[keyField];
-
-            if (validationOptions?.validation) {
-                if (validationOptions.validation.required && !value) {
-                    validationOptions.valid = false;
-                    validationOptions.message = "Bitte einen Wert angeben.";
+            const field = key as keyof InputType;
+            const opts = validation[field];
+            if (opts?.validation) {
+                if (opts.validation.required && !value) {
+                    opts.valid = false;
+                    opts.message = "Bitte einen Wert angeben.";
                     formIsValid = false;
-                } else if (validationOptions.validation.minLength && value && (value as string).length < validationOptions.validation.minLength) {
-                    validationOptions.valid = false;
-                    validationOptions.message = `Bitte einen Wert mit mindestens ${validationOptions.validation.minLength} Zeichen angeben.`;
+                } else if (
+                    opts.validation.minLength &&
+                    typeof value === "string" &&
+                    value.length < opts.validation.minLength
+                ) {
+                    opts.valid = false;
+                    opts.message = `Mindestens ${opts.validation.minLength} Zeichen.`;
                     formIsValid = false;
-                } else if (validationOptions.validation.maxLength && value && (value as string).length > validationOptions.validation.maxLength) {
-                    validationOptions.valid = false;
-                    validationOptions.message = `Bitte einen Wert mit maximal ${validationOptions.validation.maxLength} Zeichen angeben.`;
+                } else if (
+                    opts.validation.maxLength &&
+                    typeof value === "string" &&
+                    value.length > opts.validation.maxLength
+                ) {
+                    opts.valid = false;
+                    opts.message = `Maximal ${opts.validation.maxLength} Zeichen.`;
                     formIsValid = false;
-                } else if (validationOptions.validation.pattern && value && !(validationOptions.validation.pattern).test(value as string)) {
-                    validationOptions.valid = false;
-                    validationOptions.message = `Bitte einen Wert mit dem Muster ${validationOptions.validation.pattern} angeben.`;
+                } else if (
+                    opts.validation.pattern &&
+                    typeof value === "string" &&
+                    !opts.validation.pattern.test(value)
+                ) {
+                    opts.valid = false;
+                    opts.message = "Ungültiges Format.";
                     formIsValid = false;
                 } else {
-                    validationOptions.valid = true;
-                    validationOptions.message = "";
+                    opts.valid = true;
+                    opts.message = "";
                 }
+                setValidation(prev => ({
+                    ...prev,
+                    [field]: { ...opts }
+                }));
             }
-
-            setValidation((prevState) => ({
-                ...prevState,
-                [keyField]: {
-                    ...validationOptions,
-                    message: validationOptions?.message ?? "",
-                    valid: validationOptions?.valid ?? false,
-                }
-            }));
-        })
-
+        });
         return formIsValid;
     }
 
+    // Save-Handler: unterscheidet Create vs. Update, inkl. n:n-Verknüpfung
+    async function handleSaveClicked(): Promise<void> {
+        if (!validateForm()) return;
 
-    function handleSaveClicked(): void {
-        console.log("Save clicked", input);
-
-        if (!validateForm()) {
-            console.log("Validation failed");
-            return;
+        let actorId: number | undefined;
+        if (id) {
+            // Update-Modus
+            const updated = await updateActor(id, {
+                first_name: input.first_name,
+                last_name: input.last_name
+            });
+            if (updated) actorId = Number(id);
+            else {
+                alert("Update fehlgeschlagen.");
+                return;
+            }
+        } else {
+            // Create-Modus
+            const newId = await createActor({
+                first_name: input.first_name,
+                last_name: input.last_name
+            });
+            if (newId) actorId = newId;
+            else {
+                alert("Erstellung fehlgeschlagen.");
+                return;
+            }
         }
 
-        /*
-        const parsedInput = {...input, id: Number(input.id)};
-
-        console.log("Parsed input", parsedInput);
+        // ==== NEU: n:n Actor↔Film aktualisieren ====
+        if (actorId !== undefined) {
+            // alle alten Zuordnungen löschen
+            await Promise.all(
+                allFilms.map(f =>
+                    fetch(`http://localhost:3000/actor/${actorId}/film/${f.film_id}`, {
+                        method: "DELETE"
+                    })
+                )
+            );
+            // nur ausgewählte Zuordnungen neu anlegen
+            await Promise.all(
+                selectedFilms.map(fid =>
+                    fetch(`http://localhost:3000/actor/${actorId}/film/${fid}`, {
+                        method: "POST"
+                    })
+                )
+            );
+        }
 
         setValidation(defaultValidation);
-         */
+        navigate("/actor");
     }
 
     return (
         <div>
+            {/* Überschrift je nach Modus */}
+            <Typography variant="h5" gutterBottom>
+                {id ? `Actor bearbeiten (ID ${id})` : "Neuen Actor anlegen"}
+            </Typography>
 
-            Actor Page
-            <Stack spacing={2} direction={"row"}>
-                <Stack spacing={2} justifyContent="flex-start" direction="column" alignItems="flex-start">
-                    <TextField
-                        label="Actor ID"
-                        variant="standard"
-                        value={input.id}
-                        onChange={(e) =>
-                            handleInputChanged("id", e.target.value)
+            <Stack spacing={2} maxWidth={400}>
+                {/* Vorname */}
+                <TextField
+                    label="Vorname"
+                    variant="standard"
+                    value={input.first_name}
+                    onChange={e => handleInputChanged("first_name", e.target.value)}
+                />
+                {/* Nachname */}
+                <TextField
+                    label="Nachname"
+                    variant="standard"
+                    value={input.last_name}
+                    onChange={e => handleInputChanged("last_name", e.target.value)}
+                />
+
+                {/* === NEU: Multi-Select Filme === */}
+                <FormControl variant="standard" fullWidth>
+                    <InputLabel id="film-multi-label">Filme</InputLabel>
+                    <Select
+                        labelId="film-multi-label"
+                        multiple
+                        value={selectedFilms}
+                        onChange={(e: SelectChangeEvent<number[]>) =>
+                            setSelectedFilms(e.target.value as number[])
                         }
-                    />
-                    <TextField
-                        label="Vorname"
-                        variant="standard"
-                        value={input.first_name}
-                        onChange={(e) =>
-                            handleInputChanged("first_name", e.target.value)
+                        renderValue={vals =>
+                            allFilms
+                                .filter(f => vals.includes(f.film_id!))
+                                .map(f => f.title)
+                                .join(", ")
                         }
-                    />
-                    <TextField
-                        label="Nachname"
-                        variant="standard"
-                        value={input.last_name}
-                        onChange={(e) =>
-                            handleInputChanged("last_name", e.target.value)
-                        }
-                    />
-                    <Button variant="contained" onClick={handleSaveClicked}> Save</Button>
+                    >
+                        {allFilms.map(f => (
+                            <MenuItem key={f.film_id} value={f.film_id!}>
+                                {f.title}
+                            </MenuItem>
+                        ))}
+                    </Select>
+                </FormControl>
+
+                {/* Save- & Cancel-Buttons */}
+                <Stack direction="row" spacing={2} pt={2}>
+                    <Button variant="contained" onClick={handleSaveClicked}>
+                        Save
+                    </Button>
+                    <Button variant="outlined" onClick={() => navigate("/actor")}>
+                        Cancel
+                    </Button>
                 </Stack>
-
             </Stack>
+
+            {/* Debug-Ausgabe: Input & Validation */}
+            <Typography variant="subtitle2" pt={4}>
+                Debug: Input
+            </Typography>
+            <JsonView value={input} collapsed />
+
+            <Typography variant="subtitle2" pt={2}>
+                Debug: Validation
+            </Typography>
+            <JsonView value={validation} collapsed />
+
+            {/* Debug-Ausgabe: Selected Films */}
+            <Typography variant="subtitle2" pt={2}>
+                Debug: Ausgewählte Filme
+            </Typography>
+            <JsonView value={selectedFilms} collapsed />
         </div>
     );
 };
-
 
 export default ActorFormular;

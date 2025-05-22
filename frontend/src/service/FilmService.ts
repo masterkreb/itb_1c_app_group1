@@ -1,22 +1,30 @@
-import {Film} from "../types/types.ts";
+// frontend/src/service/FilmService.ts
 
+import { Film } from "../types/types";
 
 const baseUrl = "http://localhost:3000/film";
 
+/**
+ * Schema für API-Antworten vom Backend
+ */
+interface ApiResponse<T> {
+    message: string;
+    data: T;
+}
 
-// Types
-// export type FilmRating = "G" | "PG" | "PG-13" | "R" | "NC-17";
+/**
+ * Lädt alle Filme, optional gefiltert nach einem Titelpräfix.
+ * @param titleFilter Ein Filter-String; lädt nur Filme, deren Titel damit beginnt.
+ */
+export async function getAllFilms(titleFilter?: string): Promise<Film[] | undefined> {
+    // Wenn ein Filter angegeben wurde, hänge ihn als Query-Param an
+    const url = titleFilter
+        ? `${baseUrl}?title=${encodeURIComponent(titleFilter)}`
+        : baseUrl;
 
-
-
-export async function getAllFilms(): Promise<Film[] | undefined> {
-    console.log("Start getAllFilms");
-
-    const response = await fetch(baseUrl, {
+    const response = await fetch(url, {
         method: "GET",
-        headers: {
-            "Content-Type": "application/json"
-        },
+        headers: { "Content-Type": "application/json" }
     });
 
     if (!response.ok) {
@@ -24,41 +32,36 @@ export async function getAllFilms(): Promise<Film[] | undefined> {
         return undefined;
     }
 
-    const result = await response.json();
-    console.log(result);
-    return result;
+    const payload: { message: string; data: Film[] } = await response.json();
+    return payload.data;
 }
 
+/**
+ * Lädt einen einzelnen Film anhand seiner ID.
+ */
 export async function getFilmById(id: string): Promise<Film | undefined> {
-    console.log(`Start getFilmById: ${id}`);
-
     const response = await fetch(`${baseUrl}/${id}`, {
         method: "GET",
-        headers: {
-            "Content-Type": "application/json"
-        },
+        headers: { "Content-Type": "application/json" }
     });
 
     if (!response.ok) {
-        console.error(`Error while fetching film with id ${id}:`, response.status);
+        console.error(`Error while fetching film ${id}:`, response.status);
         return undefined;
     }
 
-    const result = await response.json();
-    console.log("Successfully getFilmById", result);
-
-    return result;
+    const payload: ApiResponse<Film> = await response.json();
+    return payload.data;
 }
 
-export async function createFilm(film: Film): Promise<Film | undefined> {
-    console.log("Start createFilm");
-
+/**
+ * Legt einen neuen Film an und gibt die neu erzeugte ID zurück.
+ */
+export async function createFilm(film: Film): Promise<number | undefined> {
     const response = await fetch(baseUrl, {
         method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify(film),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(film)
     });
 
     if (!response.ok) {
@@ -66,44 +69,42 @@ export async function createFilm(film: Film): Promise<Film | undefined> {
         return undefined;
     }
 
-    const result = await response.json();
-    console.log("Successfully createFilm", result);
-    return result;
+    // Antwort: { message: string; id: number }
+    const { id } = await response.json() as { message: string; id: number };
+    return id;
 }
 
-export async function updateFilm(id: string, film: Partial<Film>): Promise<Film | undefined> {
-    console.log(`Start updateFilm: ${id}`);
-
+/**
+ * Aktualisiert einen Film und gibt die Anzahl der geänderten Datensätze zurück.
+ */
+export async function updateFilm(id: string, film: Partial<Film>): Promise<number | undefined> {
     const response = await fetch(`${baseUrl}/${id}`, {
         method: "PUT",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify(film),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(film)
     });
 
     if (!response.ok) {
-        console.error(`Error while updating film with id ${id}:`, response.status);
+        console.error(`Error while updating film ${id}:`, response.status);
         return undefined;
     }
 
-    const result = await response.json();
-    console.log("Successfully updateFilm", result);
-    return result;
+    // Antwort: { message: string; updatedCount: number }
+    const { updatedCount } = await response.json() as { message: string; updatedCount: number };
+    return updatedCount;
 }
 
+/**
+ * Löscht einen Film und liefert true, wenn's geklappt hat.
+ */
 export async function deleteFilm(id: string): Promise<boolean> {
-    console.log(`Start deleteFilm: ${id}`);
-
     const response = await fetch(`${baseUrl}/${id}`, {
         method: "DELETE",
-        headers: {
-            "Content-Type": "application/json"
-        },
+        headers: { "Content-Type": "application/json" }
     });
 
     if (!response.ok) {
-        console.error(`Error while deleting film with id ${id}:`, response.status);
+        console.error(`Error while deleting film ${id}:`, response.status);
         return false;
     }
 

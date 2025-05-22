@@ -1,59 +1,142 @@
-// noinspection JSUnusedLocalSymbols
+import React, { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
+import { getAllFilms, deleteFilm } from '../service/FilmService';
+import { Film } from '../types/types';
+import {
+    Paper,
+    Table,
+    TableBody,
+    TableCell,
+    TableContainer,
+    TableHead,
+    TableRow,
+    Button,
+    Stack,
+    TextField,
+    Typography
+} from '@mui/material';
 
-import React, {useEffect} from 'react';
-import {getAllFilms} from "../service/FilmService.ts";
-import {Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow} from "@mui/material";
+const FilmPage: React.FC = () => {
+    // Alle Filme
+    const [films, setFilms] = useState<Film[]>([]);
+    // Suchbegriff für Title-Filter
+    const [searchTerm, setSearchTerm] = useState<string>('');
 
-import {NavLink} from "react-router";
-import {Film} from "../types/types.ts";
+    /**
+     * Lädt Filme vom Server.
+     * Wird ohne Parameter aufgerufen => alle Filme
+     * Wird mit searchTerm aufgerufen => nur Titel, die so beginnen
+     */
+    const loadFilms = async (filter?: string) => {
+        const data = await getAllFilms(filter);
+        if (data) {
+            setFilms(data);
+        }
+    };
 
-const FilmPage = () => {
-    const [films, setFilms] = React.useState<Film[] | undefined>();
-
+    // Beim ersten Render ohne Filter laden
     useEffect(() => {
-        getFilms();
-    }, [])
+        loadFilms();
+    }, []);
 
-    async function getFilms() {
-        const tempFilms = await getAllFilms();
-        console.log("Got films from server: ", tempFilms);
-        setFilms(tempFilms);
-        console.log("Ending GetFilms")
-    }
+    /**
+     * Löscht einen Film und lädt danach erneut (mit aktuellem Filter).
+     */
+    const handleDelete = async (id?: number) => {
+        if (!id) return;
+        // Sicherheitsabfrage
+        if (!window.confirm(`Film ${id} wirklich löschen?`)) return;
 
+        const success = await deleteFilm(id.toString());
+        if (success) {
+            // Nach dem Löschen mit dem aktuellen Suchbegriff neu laden
+            loadFilms(searchTerm);
+        } else {
+            alert('Löschen fehlgeschlagen');
+        }
+    };
 
     return (
         <div>
-            Film Page
+            {/* Überschrift */}
+            <Typography variant="h4" gutterBottom>
+                Filme
+            </Typography>
+
+            {/* Suchleiste */}
+            <Stack direction="row" spacing={2} alignItems="center" mb={2}>
+                <TextField
+                    label="Search by title"
+                    variant="outlined"
+                    size="small"
+                    value={searchTerm}
+                    onChange={e => setSearchTerm(e.target.value)}
+                />
+                <Button
+                    variant="contained"
+                    onClick={() => loadFilms(searchTerm)}  // Filter anwenden
+                >
+                    Search
+                </Button>
+                <Button
+                    variant="outlined"
+                    onClick={() => {
+                        setSearchTerm('');  // Suchbegriff zurücksetzen
+                        loadFilms();        // alle Filme neu laden
+                    }}
+                >
+                    Clear
+                </Button>
+            </Stack>
+
+            {/* Tabelle */}
             <TableContainer component={Paper}>
-                <Table sx={{minWidth: 650}} aria-label="simple table">
+                <Table aria-label="Filmtabelle">
                     <TableHead>
                         <TableRow>
                             <TableCell>ID</TableCell>
                             <TableCell>Titel</TableCell>
-                            <TableCell>Preis</TableCell>
-                            <TableCell>Dauer</TableCell>
-                            <TableCell>Aktionen</TableCell>
+                            <TableCell align="right">Aktionen</TableCell>
                         </TableRow>
                     </TableHead>
                     <TableBody>
-                        {films ? (
-                                films.map((row) => (
-                                    <TableRow
-                                        key={row.film_id}
-                                        sx={{'&:last-child td, &:last-child th': {border: 0}}}
-                                    >
-                                        <TableCell component="th" scope="row">{row.film_id}</TableCell>
-                                        <TableCell component="th" scope="row">{row.title}</TableCell>
-                                        <TableCell>{row.rental_rate}</TableCell>
-                                        <TableCell>{row.rental_duration}</TableCell>
-                                        <TableCell align="right"><NavLink to={"/film/"+row.film_id}>Details</NavLink></TableCell>
-                                    </TableRow>
-                                ))
-                            )
-                            : <TableRow>
-                                <TableCell>Keine Filme vorhanden</TableCell>
-                            </TableRow>}
+                        {films.length > 0 ? (
+                            films.map(film => (
+                                <TableRow key={film.film_id}>
+                                    <TableCell>{film.film_id}</TableCell>
+                                    <TableCell>{film.title}</TableCell>
+                                    <TableCell align="right">
+                                        <Stack direction="row" spacing={1} justifyContent="flex-end">
+                                            {/* Details-Navigation */}
+                                            <Button
+                                                component={Link}
+                                                to={`/film/${film.film_id}`}
+                                                variant="outlined"
+                                                size="small"
+                                            >
+                                                Details
+                                            </Button>
+                                            {/* Direkt löschen */}
+                                            <Button
+                                                variant="contained"
+                                                color="error"
+                                                size="small"
+                                                onClick={() => handleDelete(film.film_id)}
+                                            >
+                                                Löschen
+                                            </Button>
+                                        </Stack>
+                                    </TableCell>
+                                </TableRow>
+                            ))
+                        ) : (
+                            // Falls keine Filme (oder kein Treffer beim Filter)
+                            <TableRow>
+                                <TableCell colSpan={3} align="center">
+                                    Keine Filme gefunden
+                                </TableCell>
+                            </TableRow>
+                        )}
                     </TableBody>
                 </Table>
             </TableContainer>

@@ -1,62 +1,117 @@
-import React, {useEffect} from 'react';
-import {getAllActors} from "../service/ActorService.ts";
-import {Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow} from "@mui/material";
+// frontend/src/pages/ActorPage.tsx
 
+import React, { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';                     // ← statt NavLink von "react-router"
+import { getAllActors, deleteActor } from '../service/ActorService';
+import { Actor } from '../types/types';
+import {
+    Paper,
+    Table,
+    TableBody,
+    TableCell,
+    TableContainer,
+    TableHead,
+    TableRow,
+    Button,
+    Stack,
+    Typography
+} from '@mui/material';
 
-import {NavLink} from "react-router";
-import {Actor} from "../types/types.ts";
+const ActorPage: React.FC = () => {
+    // State für Schauspieler-Liste
+    const [actors, setActors] = useState<Actor[]>([]);
 
-const ActorPage = () => {
-    const [actors, setActor] = React.useState<Actor[] | undefined>();
+    // Lädt alle Schauspieler
+    const loadActors = async () => {
+        const data = await getAllActors();
+        if (data) setActors(data);
+    };
 
     useEffect(() => {
-        getActor();
-    }, [])
+        loadActors();
+    }, []);
 
-    async function getActor() {
-        const tempActor = await getAllActors();
-        console.log("Got actors from server: ", tempActor);
-        setActor(tempActor);
-        console.log("Ending GetActors")
-    }
-
+    // Handler zum Löschen
+    const handleDelete = async (id?: number) => {
+        if (!id) return;
+        if (!window.confirm(`Schauspieler ${id} wirklich löschen?`)) return;
+        const success = await deleteActor(id.toString());
+        if (success) {
+            loadActors();
+        } else {
+            alert('Löschen fehlgeschlagen');
+        }
+    };
 
     return (
         <div>
-           Actor Page
+            {/* Überschrift */}
+            <Typography variant="h4" gutterBottom>
+                Schauspieler
+            </Typography>
+
+            {/* Button zum Anlegen */}
+            <Stack direction="row" spacing={2} mb={2}>
+                <Button component={Link} to="/actor/new" variant="contained">
+                    Neuer Schauspieler
+                </Button>
+            </Stack>
+
+            {/* Tabelle */}
             <TableContainer component={Paper}>
-                <Table sx={{minWidth: 650}} aria-label="simple table">
+                <Table aria-label="Actortabelle">
                     <TableHead>
                         <TableRow>
                             <TableCell>ID</TableCell>
-                            <TableCell>Name</TableCell>
+                            <TableCell>Vorname</TableCell>
                             <TableCell>Nachname</TableCell>
+                            <TableCell align="right">Aktionen</TableCell>
                         </TableRow>
                     </TableHead>
+
                     <TableBody>
-                        {actors ? (
-                                actors.map((row) => (
-                                    <TableRow
-                                        key={row.actor_id}
-                                        sx={{'&:last-child td, &:last-child th': {border: 0}}}
-                                    >
-                                        <TableCell component="th" scope="row">{row.actor_id}</TableCell>
-                                        <TableCell component="th" scope="row">{row.first_name}</TableCell>
-                                        <TableCell>{row.last_name}</TableCell>
-                                        <TableCell align="right"><NavLink to={"/actor/"+row.actor_id}>Details</NavLink></TableCell>
-                                    </TableRow>
-                                ))
-                            )
-                            : <TableRow>
-                                <TableCell>Keine Actor vorhanden</TableCell>
-                            </TableRow>}
+                        {actors.length > 0 ? (
+                            actors.map(actor => (
+                                <TableRow key={actor.actor_id}>
+                                    <TableCell>{actor.actor_id}</TableCell>
+                                    <TableCell>{actor.first_name}</TableCell>
+                                    <TableCell>{actor.last_name}</TableCell>
+                                    <TableCell align="right">
+                                        <Stack direction="row" spacing={1} justifyContent="flex-end">
+                                            {/* Details/Edit */}
+                                            <Button
+                                                component={Link}
+                                                to={`/actor/${actor.actor_id}`}
+                                                variant="outlined"
+                                                size="small"
+                                            >
+                                                Details
+                                            </Button>
+                                            {/* Löschen */}
+                                            <Button
+                                                variant="contained"
+                                                color="error"
+                                                size="small"
+                                                onClick={() => handleDelete(actor.actor_id)}
+                                            >
+                                                Löschen
+                                            </Button>
+                                        </Stack>
+                                    </TableCell>
+                                </TableRow>
+                            ))
+                        ) : (
+                            <TableRow>
+                                <TableCell colSpan={4} align="center">
+                                    Keine Schauspieler vorhanden
+                                </TableCell>
+                            </TableRow>
+                        )}
                     </TableBody>
                 </Table>
             </TableContainer>
         </div>
     );
 };
-
-
 
 export default ActorPage;
