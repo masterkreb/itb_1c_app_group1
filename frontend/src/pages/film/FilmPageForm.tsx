@@ -11,9 +11,9 @@ import {
     TextField,
     Typography
 } from "@mui/material";
-import {addActorToFilm, createFilm, getFilmById, removeActorFromFilm, updateFilm} from "../../service/FilmService";
+import {createFilm, getFilmById, updateFilm} from "../../service/FilmService";
 import {useEffect, useState} from "react";
-import {createActor} from "../../service/ActorService.ts";
+
 
 // Typdefinition für Film-Input
 export interface FilmInputType {
@@ -28,7 +28,6 @@ export interface FilmInputType {
     replacement_cost?: string;
     language_id?: string;
     special_features?: string;
-    actors: { first_name: string; last_name: string }[];
 }
 
 // Validierungsstruktur für Eingabefelder
@@ -58,7 +57,7 @@ const defaultInput: FilmInputType = {
     replacement_cost: "",
     language_id: "",
     special_features: "",
-    actors: []
+
 };
 
 // Validierungsregeln nur für Pflichtfelder
@@ -162,7 +161,7 @@ const FilmPageForm = () => {
     const navigate = useNavigate();
     const [input, setInput] = useState<FilmInputType>({ ...defaultInput });
     const [validation, setValidation] = useState<ValidationFieldset>({ ...defaultValidation });
-    const [newActorInputs, setNewActorInputs] = useState([{ first_name: "", last_name: "" }]);
+
 
     useEffect(() => {
         console.log("Film Page mounted");
@@ -202,14 +201,7 @@ const FilmPageForm = () => {
         });
     }
 
-    /**
-     * Fügt ein neues Schauspieler-Eingabefeld max. 5 hinzu.
-     */
-    function handleAddActorInput(): void {
-        if (newActorInputs.length < 5) {
-            setNewActorInputs([...newActorInputs, { first_name: "", last_name: "" }]);
-        }
-    }
+
 
     /**
      * Aktualisiert Vorname oder Nachname eines neuen Schauspielers.
@@ -217,42 +209,13 @@ const FilmPageForm = () => {
      * @param {"first_name" | "last_name"} field - Welches Feld verändert wird
      * @param {string} value - Der neue Textwert
      */
-    function handleActorInputChange(index: number, field: "first_name" | "last_name", value: string): void {
-        const updated = [...newActorInputs];
-        updated[index][field] = value;
-        setNewActorInputs(updated);
-    }
+
 
     /**
      * Entfernt einen bestehenden Schauspieler aus der Schauspieler-Liste.
      * @param {number} actor_id - Die ID des zu entfernenden Schauspielers
      */
-    async function handleRemoveActor(actor_id: number): Promise<void> {
-        if (!id) return;
 
-        const confirmed = window.confirm("Schauspieler wirklich entfernen?");
-        if (!confirmed) return;
-
-        const success = await removeActorFromFilm(parseInt(id), actor_id);
-        if (success) {
-            const updated = await getFilmById(id);
-            setInput({
-                ...updated,
-                release_year: String(updated.release_year),
-                length: String(updated.length),
-                rental_rate: String(updated.rental_rate),
-                rental_duration: String(updated.rental_duration),
-                replacement_cost: String(updated.replacement_cost),
-                language_id: String(updated.language_id),
-                rating: updated.rating || "",
-                special_features: updated.special_features || "",
-                actors: updated.actors || []
-            });
-
-        } else {
-            alert("Entfernen fehlgeschlagen.");
-        }
-    }
 
 
 
@@ -328,14 +291,12 @@ const FilmPageForm = () => {
     async function handleSaveClicked(): Promise<void> {
         if (!validateForm()) return;
 
-        const validActors = newActorInputs.filter(a => a.first_name.trim() && a.last_name.trim());
+
 
         const sanitizedInput = Object.fromEntries(
-            Object.entries({
-                ...input,
-                actors: [...input.actors.filter((a: any) => a.actor_id), ...validActors]
-            }).map(([key, val]) => [key, val === "" ? undefined : val])
+            Object.entries(input).map(([key, val]) => [key, val === "" ? undefined : val])
         );
+
 
         delete sanitizedInput.film_id;
         console.log("GÖNDERİLEN VERİ:", sanitizedInput);
@@ -346,14 +307,7 @@ const FilmPageForm = () => {
             : await createFilm(sanitizedInput);
 
 
-        if (success && id) {
-            for (const actor of validActors) {
-                const actorCreated = await createActor(actor);
-                if (actorCreated && typeof actorCreated === "number") {
-                    await addActorToFilm(parseInt(id), actorCreated);
-                }
-            }
-        }
+
 
         if (success) {
             setValidation(defaultValidation);
@@ -509,56 +463,7 @@ const FilmPageForm = () => {
                 </Box>
 
                 {/* Felder rechte seite */}
-                <Box sx={{ flex: 1 }}>
-                    <Typography variant="subtitle1" gutterBottom>
-                        Schauspieler im Film
-                    </Typography>
 
-                    {/* neue schauspieler eingabe */}
-                    <Stack spacing={2} mb={3}>
-                        {newActorInputs.map((actor, index) => (
-                            <Stack direction="row" spacing={1} key={index}>
-                                <TextField
-                                    label="Vorname"
-                                    value={actor.first_name}
-                                    onChange={(e) => handleActorInputChange(index, "first_name", e.target.value)}
-                                    fullWidth
-                                />
-                                <TextField
-                                    label="Nachname"
-                                    value={actor.last_name}
-                                    onChange={(e) => handleActorInputChange(index, "last_name", e.target.value)}
-                                    fullWidth
-                                />
-                            </Stack>
-                        ))}
-                        <Button
-                            variant="outlined"
-                            onClick={handleAddActorInput}
-                            disabled={newActorInputs.length >= 5}>+ Schauspieler</Button>
-                    </Stack>
-
-                    {/* bestehende schauspieler anzeigen */}
-                    <Stack spacing={1}>
-                        {input.actors && input.actors.length > 0 ? (
-                            input.actors.map((actor: any) => (
-                                <Stack key={actor.actor_id} direction="row" spacing={2} alignItems="center">
-                                    <span>{actor.first_name} {actor.last_name}</span>
-                                    <Button
-                                        variant="outlined"
-                                        color="error"
-                                        size="small"
-                                        onClick={() => handleRemoveActor(actor.actor_id)}
-                                    >
-                                        Entfernen
-                                    </Button>
-                                </Stack>
-                            ))
-                        ) : (
-                            <Typography color="text.secondary">Noch keine Schauspieler hinzugefügt</Typography>
-                        )}
-                    </Stack>
-                </Box>
             </Stack>
         </Box>
     );
