@@ -147,9 +147,13 @@ const FilmFormular: React.FC = () => {
 
                 {/* Schauspieler anzeigen und bearbeiten */}
                 <TextField
-                    label="Schauspieler (IDs durch Komma getrennt)"
+                    label="Schauspieler"
                     name="actors"
-                    value={film.actors?.map(actor => actor.actor_id).join(', ') || ''}
+                    value={
+                        film.actors
+                            ?.map(actor => `${actor.first_name} ${actor.last_name}`)
+                            .join(', ') || ''
+                    }
                     onChange={handleChange}
                     fullWidth
                 />
