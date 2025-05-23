@@ -8,6 +8,9 @@ import { getActorById, createActor, updateActor} from "../../service/ActorServic
 import { Film } from "../../types/types.ts";
 import { getAllFilms, removeActorFromFilm, addActorToFilm } from "../../service/FilmService.ts";
 
+/**
+ * Datentyp für Schauspieler-Eingaben im Formular
+ */
 export interface InputType {
     actor_id: string;
     first_name: string;
@@ -15,6 +18,9 @@ export interface InputType {
     films?: Film[];
 }
 
+/**
+ * Validierungsregeln für die Formularfelder
+ */
 export type ValidationFieldset = {
     [key in keyof Partial<InputType>]: {
         validation?: {
@@ -67,7 +73,15 @@ const defaultValidation: ValidationFieldset = {
 };
 
 
-
+/**
+ * Komponente für das Erstellen und Bearbeiten eines Schauspielers sowie das Verknüpfen von Filmen.
+ * @returns Ein Formular zum Erfassen oder Bearbeiten eines Schauspielers inkl. Filmverknüpfung per Dropdown und Liste zur Entfernung verknüpfter Filme.
+ * useParams holt die ID aus der URL um Schauspieler aus dem Server zu laden.
+ * @state input - Enthält die aktuellen Formulardaten des Schauspielers (Vorname, Nachname, verknüpfte Filme).
+ * @state validation - Speichert den Validierungsstatus und eventuelle Fehlermeldungen für jedes Eingabefeld.
+ * @state allFilms - Liste aller Filme aus der Datenbank, die für eine Verknüpfung zur Auswahl stehen.
+ * @state selectedFilmId - Die ID des aktuell im Dropdown ausgewählten Films, der mit dem Schauspieler verknüpft werden soll.
+ */
 const ActorPageForm = () => {
     const { id } = useParams();
     const isEditMode = !!id;
@@ -94,11 +108,17 @@ const ActorPageForm = () => {
         }
     }, [id]);
 
+    /**
+     * Lädt alle Filme vom Server
+     */
     async function loadAllFilms() {
         const films = await getAllFilms();
         setAllFilms(films);
     }
 
+    /**
+     * Aktualisiert ein Feld im Formular
+     */
     function handleInputChanged(key: keyof InputType, value: unknown) {
         setInput({
                 ...input,
@@ -157,6 +177,10 @@ const ActorPageForm = () => {
         return formIsValid;
     }
 
+    /**
+     * Speichert den Schauspieler (neu oder bearbeitet), hinter dem Speichern Button hinterlegt.
+     * Bei erfolgreichem Bearbeiten/Erfassen kehrt man zur actor-Page zurück, ansonsten erscheint eine Fehlermeldung.
+     */
     async function handleSaveClicked(): Promise<void> {
         console.log("Save clicked", input);
 
@@ -177,6 +201,9 @@ const ActorPageForm = () => {
         }
     }
 
+    /**
+     * Verknüpft einen Film mit dem Schauspieler
+     */
     async function handleAddFilm() {
         if (!id || !selectedFilmId) return;
 
@@ -195,6 +222,9 @@ const ActorPageForm = () => {
         }
     }
 
+    /**
+     * Entfernt eine Filmverknüpfung vom Schauspieler
+     */
     async function handleRemoveFilm(filmId: number) {
         if (!id) return;
 
@@ -212,6 +242,10 @@ const ActorPageForm = () => {
         }
     }
 
+    /**
+     * Wird verwendet um bei neuen Schauspieler Filme zu verknüpfen.
+     * Speichert den Schauspieler um eine ID zu generieren und navigiert dann zur edit-Page um Filme verknüpfen zu können.
+     */
     async function handleCreateAndNavigate() {
         if (!validateForm()) {
             return;

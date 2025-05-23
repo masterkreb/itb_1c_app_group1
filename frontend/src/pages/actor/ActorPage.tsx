@@ -7,15 +7,13 @@ import {Actor} from "../../types/types.ts";
 import {Button, Paper, Table, TableBody, TableContainer, TableHead, TableRow, TextField, TableCell} from "@mui/material";
 
 /**
- * Funktion die, die Actor Page rendert und im Router dem path /actor zugewiesen wird.
+ * Rendert Actor Page und ist im Router dem path /actor zugewiesen wird.
  * @returns:
  * - Eine Tabelle aller Schauspieler inkl. ID, Vorname, Nachname und den verknüpften Filmen.
  * - Eine Suchleiste mit Button um einen bestimmten Schauspieler über die ID zu öffnen.
  * - Einen Button um einen neuen Schauspieler zu erfassen (navigiert zu /actor/new).
- *
- * State Variablen:
- * - `actors`: Speichert eine Liste aller Actor Objekte.
- * - `searchId`: Überblickt den User Input in der Suchleiste.
+ * @state actors: Speichert eine Liste aller Actor Objekte.
+ * @state searchId: Überblickt den User Input in der Suchleiste.
  */
 const ActorPage = () => {
     const [actors, setActors] = React.useState<Actor[] | undefined>();
@@ -26,11 +24,18 @@ const ActorPage = () => {
         getActors();
     }, [])
 
+    /**
+     * Ladet alle Schauspieler aus der Datenbank
+     */
     async function getActors() {
         const tempActors = await getAllActors();
         setActors(tempActors);
     }
 
+    /**
+     * Bearbeitet das Suchfeld, wenn jemand im Suchfeld eine ID eingibt, wird diese ID gesucht und die Detail-Seite geöffnet.
+     * Wenn die ID nicht gefunden wird, tritt ein Fehler auf.
+     */
     const handleSearch = async () => {
         if (!searchId.trim()) return;
 

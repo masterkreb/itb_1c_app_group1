@@ -8,7 +8,14 @@ import { deleteActor } from "../../service/ActorService.ts";
 import { Actor } from '../../types/types.ts';
 import {Button, Typography, TableContainer, Paper, Table, TableBody, TableRow, TableCell, TableHead} from '@mui/material';
 
-
+/**
+ * Rendert Actor Page und ist im Router dem path /actor/:id zugewiesen wird.
+ * @returns:
+ * - Eine Tabelle mit den Daten von einem Schauspieler inkl. ID, Vorname, Nachname und den verknüpften Filmen.
+ * - Drei Button, zum Bearbeiten, Löschen und um einen neuen Schauspieler anzulegen.
+ * useParams holt die ID aus der URL um den Schauspieler aus dem Server zu laden.
+ * @state actor: Speichert die Daten des aktuell ausgewählten Schauspielers.
+ */
 const ActorDetailsPage = () => {
     const { id } = useParams();
     const [actor, setActor] = useState<Actor | null>(null);
@@ -24,10 +31,17 @@ const ActorDetailsPage = () => {
         }
     }, [id]);
 
+    /**
+     * Navigiert zur edit-Page, ist hinter dem Bearbeiten Button hinterlegt
+     */
     const handleEdit = () => {
         navigate(`/actor/edit/${actor?.actor_id}`);
     };
 
+    /**
+     * Löst die deleteActor Funktion für die aktuelle ID aus, wenn jemand auf Löschen klickt.
+     * Bei erfolgreichem Löschen kehrt man zur actor-Page zurück, ansonsten erscheint eine Fehlermeldung
+     */
     const handleDelete = async () => {
         const confirmDelete = window.confirm("Willst du diesen Schauspieler wirklich löschen?");
         if (confirmDelete && actor) {
@@ -40,11 +54,16 @@ const ActorDetailsPage = () => {
         }
     };
 
+    /**
+     * Navigiert zur new-Page um Schauspieler zu erfassen, ist hinter dem Neuer Schauspieler Button hinterlegt
+     */
     const handleNew = () => {
         navigate("/actor/new");
     };
 
-
+    /**
+     * Erscheint, wenn zu einer ID kein Schauspieler gefunden wird
+     */
     if (!actor) {
         return <div>Schauspieler nicht gefunden...</div>;
     }
