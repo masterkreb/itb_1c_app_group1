@@ -1,54 +1,132 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from "react";
 import { getAllFilms } from "../services/FilmService";
-import { Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from "@mui/material";
 import { Film } from "../types/types";
-import { NavLink } from "react-router";
+import {
+    Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper,
+    Button, Stack, Typography, CircularProgress, IconButton, Tooltip
+} from "@mui/material";
+import { NavLink, useNavigate } from "react-router";
+import RefreshIcon from "@mui/icons-material/Refresh";
+import VisibilityIcon from "@mui/icons-material/Visibility";
+import EditIcon from "@mui/icons-material/Edit";
 
-const FilmPage = () => {
-    const [films, setFilms] = React.useState<Film[]>([]);
+/**
+ * FilmPage – Zeigt eine übersichtliche Liste aller Filme mit Aktionen.
+ * REST-konform, mit Fehlerbehandlung, Navigationsbutton und sauberem Layout.
+ *
+ * @returns React-Komponente
+ */
+const FilmPage: React.FC = () => {
+    const [films, setFilms] = useState<Film[]>([]);
+    const [error, setError] = useState<string | null>(null);
+    const [loading, setLoading] = useState<boolean>(true);
+    const navigate = useNavigate();
 
     useEffect(() => {
-        getFilms();
+        loadFilms();
     }, []);
 
-    async function getFilms() {
-        const tempFilms = await getAllFilms();
-        setFilms(tempFilms);
+    /**
+     * Holt alle Filme aus dem Backend.
+     */
+    async function loadFilms() {
+        setLoading(true);
+        try {
+            const data = await getAllFilms();
+            setFilms(data);
+            setError(null);
+        } catch (err: any) {
+            setError("Filme konnten nicht geladen werden.");
+            setFilms([]);
+        } finally {
+            setLoading(false);
+        }
     }
 
     return (
         <div>
-            <h2>Film Page</h2>
+            <Stack direction="row" justifyContent="space-between" alignItems="center" mb={2}>
+                <Stack direction="row" alignItems="center" spacing={2}>
+                    <Typography variant="h4">Filme verwalten</Typography>
+                    <Tooltip title="Aktualisieren">
+                        <IconButton onClick={loadFilms} color="primary">
+                            <RefreshIcon />
+                        </IconButton>
+                    </Tooltip>
+                </Stack>
+                <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={() => navigate("/film/new")}
+                >
+                    Neuen Film anlegen
+                </Button>
+            </Stack>
+
             <TableContainer component={Paper}>
-                <Table sx={{ minWidth: 650 }} aria-label="simple table">
+                <Table>
                     <TableHead>
                         <TableRow>
                             <TableCell>ID</TableCell>
                             <TableCell>Titel</TableCell>
                             <TableCell>Preis</TableCell>
                             <TableCell>Dauer</TableCell>
-                            <TableCell>Aktionen</TableCell>
+                            <TableCell align="right">Aktionen</TableCell>
                         </TableRow>
                     </TableHead>
                     <TableBody>
-                        {films.length > 0 ? (
-                            films.map((row) => (
-                                <TableRow
-                                    key={row.film_id}
-                                    sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
-                                >
-                                    <TableCell component="th" scope="row">{row.film_id}</TableCell>
-                                    <TableCell>{row.title}</TableCell>
-                                    <TableCell>{row.rental_rate}</TableCell>
-                                    <TableCell>{row.rental_duration}</TableCell>
+                        {loading ? (
+                            <TableRow>
+                                <TableCell colSpan={5} align="center" sx={{ py: 3 }}>
+                                    <CircularProgress size={24} />
+                                    <Typography variant="body2" sx={{ ml: 2, display: 'inline' }}>
+                                        Lade Filme...
+                                    </Typography>
+                                </TableCell>
+                            </TableRow>
+                        ) : error ? (
+                            <TableRow>
+                                <TableCell colSpan={5} align="center" sx={{ color: "error.main", py: 2 }}>
+                                    {error}
+                                </TableCell>
+                            </TableRow>
+                        ) : films.length > 0 ? (
+                            films.map((film) => (
+                                <TableRow key={film.film_id} hover>
+                                    <TableCell>{film.film_id}</TableCell>
+                                    <TableCell>{film.title}</TableCell>
+                                    <TableCell>{film.rental_rate}</TableCell>
+                                    <TableCell>{film.length}</TableCell>
                                     <TableCell align="right">
-                                        <NavLink to={`/film/${row.film_id}`}>Details</NavLink>
+                                        <Tooltip title="Details anzeigen">
+                                            <IconButton
+                                                size="small"
+                                                color="primary"
+                                                component={NavLink}
+                                                to={`/film/${film.film_id}`}
+                                            >
+                                                <VisibilityIcon fontSize="small" />
+                                            </IconButton>
+                                        </Tooltip>
+                                        <Tooltip title="Bearbeiten">
+                                            <IconButton
+                                                size="small"
+                                                color="primary"
+                                                component={NavLink}
+                                                to={`/film/${film.film_id}/edit`}
+                                                sx={{ ml: 1 }}
+                                            >
+                                                <EditIcon fontSize="small" />
+                                            </IconButton>
+                                        </Tooltip>
                                     </TableCell>
                                 </TableRow>
                             ))
                         ) : (
                             <TableRow>
-                                <TableCell colSpan={5}>Keine Filme vorhanden</TableCell>
+                                <TableCell colSpan={5} align="center" sx={{ py: 2 }}>
+                                    Keine Filme vorhanden
+                                </TableCell>
                             </TableRow>
                         )}
                     </TableBody>
