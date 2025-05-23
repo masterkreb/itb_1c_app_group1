@@ -37,6 +37,6 @@ export async function getFilmById(id: number): Promise<Film> {
     }
     
     const result = await response.json();
-    // Extrahiere die Filmdaten aus dem data-Objekt
+    // Extrahiere die Filmdaten aus dem data-Objekt.
     return result.data;
 }

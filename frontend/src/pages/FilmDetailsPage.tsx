@@ -1,4 +1,4 @@
-// noinspection JSUnusedLocalSymbols
+// noinspection JSUnusedLocalSymbols.
 
 import React, {useEffect, useState} from 'react';
 import {useParams} from "react-router";
