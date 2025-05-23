@@ -123,7 +123,7 @@ const FilmDetails: React.FC = () => {
                     variant="contained"
                     color="success"
                     component={Link}
-                    to="/film/new"
+                    to="/film/neu"
                 >
                     Neuen Film erstellen
                 </Button>
