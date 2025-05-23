@@ -5,19 +5,18 @@ import {getAllFilms, getFilmById} from "../../service/FilmService.ts";
 import {Button, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField} from "@mui/material";
 import {NavLink, useNavigate} from "react-router";
 
+
 /**
- * Diese Komponente zeigt eine Übersicht aller Filme.
+ * Rendert Film Page und ist im Router dem path /film zugewiesen wird.
  *
  * @returns:
- * - Eine Tabelle mit allen Filmen (ID, Titel, Schauspieler, Link zu Details)
- * - Eine Suchleiste für Film-ID
- * - Ein Button für neuen Film (navigiert zu /film/new)
+ * - Eine Tabelle aller Filme inkl. ID, Titel und den verknüpften Schauspielern.
+ * - Eine Suchleiste mit Button um einen bestimmten Film über die ID zu öffnen.
+ * - Einen Button um einen neuen Film zu erfassen (navigiert zu /film/new).
  *
- * State Variablen:
- * - `films`: Liste aller Filme
- * - `searchId`: Eingabe für die Suche nach Film-ID
+ * @state films - Speichert eine Liste aller Film Objekte.
+ * @state searchId - Überblickt den User Input in der Suchleiste.
  */
-
 const FilmPage = () => {
     const [films, setFilms] = React.useState<any[]>([]); // Liste von Filme, am Anfang leer
 
@@ -25,9 +24,11 @@ const FilmPage = () => {
     const [searchId, setSearchId] = React.useState("");
     const navigate = useNavigate(); // für Weiterleitung
 
+    /**
+     * Lädt alle Filme vom Server bei Initialisierung der Seite.
+     * Wird nur einmal beim Mounten der Komponente ausgeführt.
+     */
     React.useEffect(() => {
-
-
         console.log("Film Page geladen"); // wenn Seite lädt
         getAllFilms().then((data) => {
             console.log("Filme vom Server:", data); // kontrol
@@ -35,7 +36,13 @@ const FilmPage = () => {
         });
 
     }, []);
-    // Film ID mit Server prüfen
+
+    /**
+     * Sucht einen Film anhand der eingegebenen ID.
+     * Wenn gefunden, wird zur Detail-Seite dieses Films navigiert.
+     * Wenn nicht gefunden, erscheint eine Fehlermeldung.
+     */
+        // Film ID mit Server prüfen
     const handleSearch = async () => {
         if (!searchId.trim()) return;
 
