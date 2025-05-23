@@ -11,12 +11,13 @@ import {
     TextField,
     Typography
 } from "@mui/material";
-import {createFilm, getFilmById, updateFilm} from "../../service/FilmService";
+import {addActorToFilm, createFilm, getFilmById, removeActorFromFilm, updateFilm} from "../../service/FilmService";
 import {useEffect, useState} from "react";
+import {createActor} from "../../service/ActorService.ts";
 
 
 // Typdefinition für Film-Input
-export interface FilmInputType {
+export interface FilmInputTypeCreate {
     film_id?: string;
     title: string;
     description: string;
@@ -29,9 +30,14 @@ export interface FilmInputType {
     language_id?: string;
 }
 
+export interface FilmInputTypeEdit extends FilmInputTypeCreate {
+    actors: { actor_id: number; first_name: string; last_name: string }[];
+}
+
+
 // Validierungsstruktur für Eingabefelder
 export type ValidationFieldset = {
-    [key in keyof Partial<FilmInputType>]: {
+    [key in keyof Partial<FilmInputTypeCreate>]: {
         validation?: {
             required?: boolean;
             minLength?: number;
@@ -44,7 +50,7 @@ export type ValidationFieldset = {
 };
 
 // initiale Datenstruktur für den Film
-const defaultInput: FilmInputType = {
+const defaultInput: FilmInputTypeCreate = {
     film_id: "",
     title: "",
     description: "",
@@ -149,7 +155,12 @@ const FilmPageForm = () => {
     const { id } = useParams();
     const isEditMode = !!id; // prüfen ob edit oder neu
     const navigate = useNavigate();
-    const [input, setInput] = useState<FilmInputType>({ ...defaultInput });
+    const [input, setInput] = useState<FilmInputTypeCreate | FilmInputTypeEdit>({ ...defaultInput });
+    const [newActorInputs, setNewActorInputs] = useState([
+        { first_name: "", last_name: "" }
+    ]);
+
+
     const [validation, setValidation] = useState<ValidationFieldset>({ ...defaultValidation });
 
 
@@ -167,8 +178,7 @@ const FilmPageForm = () => {
                         replacement_cost: String(data.replacement_cost),
                         language_id: String(data.language_id),
                         rating: data.rating || "",
-                        special_features: data.special_features || "",
-                        actors: data.actors || []
+                        ...(isEditMode ? { actors: data.actors || [] } : {})
                     });
                     setValidation(defaultValidation);
                 }
@@ -181,30 +191,53 @@ const FilmPageForm = () => {
 
     /**
      * Aktualisiert ein Eingabefeld im Filmformular.
-     * @param {keyof FilmInputType} key - Der Feldname (z. B. "title")
+     * @param {keyof FilmInputTypeCreate} key - Der Feldname (z. B. "title")
      * @param {unknown} value - Der neue Wert
      */
-    function handleInputChanged(key: keyof FilmInputType, value: unknown): void {
+    function handleInputChanged(key: keyof FilmInputTypeCreate, value: unknown): void {
         setInput({
             ...input,
             [key]: value
         });
     }
+    function handleAddActorInput(): void {
+        if (newActorInputs.length < 5) {
+            setNewActorInputs([...newActorInputs, { first_name: "", last_name: "" }]);
+        }
+    }
 
+    function handleActorInputChange(
+        index: number,
+        field: "first_name" | "last_name",
+        value: string
+    ): void {
+        const updated = [...newActorInputs];
+        updated[index][field] = value;
+        setNewActorInputs(updated);
+    }
 
+    async function handleRemoveActor(actor_id: number): Promise<void> {
+        if (!isEditMode || !id) return;
 
-    /**
-     * Aktualisiert Vorname oder Nachname eines neuen Schauspielers.
-     * @param {number} index - Die Position in der Liste
-     * @param {"first_name" | "last_name"} field - Welches Feld verändert wird
-     * @param {string} value - Der neue Textwert
-     */
+        const confirmed = window.confirm("Schauspieler wirklich entfernen?");
+        if (!confirmed) return;
 
+        const success = await removeActorFromFilm(parseInt(id), actor_id);
+        if (success) {
+            setInput((prev) => {
+                const currentActors = (prev as FilmInputTypeEdit).actors || [];
+                const updatedActors = currentActors.filter((a) => a.actor_id !== actor_id);
 
-    /**
-     * Entfernt einen bestehenden Schauspieler aus der Schauspieler-Liste.
-     * @param {number} actor_id - Die ID des zu entfernenden Schauspielers
-     */
+                return {
+                    ...prev,
+                    actors: updatedActors
+                } as FilmInputTypeEdit;
+            });
+        } else {
+            alert("Fehler beim Entfernen.");
+        }
+    }
+
 
 
 
@@ -220,8 +253,8 @@ const FilmPageForm = () => {
         let formIsValid = true;
 
         Object.entries(input).forEach(([key, value]) => {
-            const keyField = key as keyof FilmInputType;
-            const validationOptions: ValidationFieldset[keyof FilmInputType] = validation[keyField];
+            const keyField = key as keyof FilmInputTypeCreate;
+            const validationOptions: ValidationFieldset[keyof FilmInputTypeCreate] = validation[keyField];
 
             if (validationOptions?.validation) {
                 if (validationOptions.validation.required && !value) {
@@ -295,6 +328,15 @@ const FilmPageForm = () => {
         const success = id
             ? await updateFilm(id, sanitizedInput)
             : await createFilm(sanitizedInput);
+        if (success && id) {
+            for (const actor of newActorInputs.filter(a => a.first_name.trim() && a.last_name.trim())) {
+                const created = await createActor(actor);
+                if (created && typeof created === "number") {
+                    await addActorToFilm(parseInt(id), created);
+                }
+            }
+        }
+
 
 
 
@@ -444,9 +486,78 @@ const FilmPageForm = () => {
                 </Box>
 
                 {/* Felder rechte seite */}
+                {isEditMode && (
+                    <Box sx={{ flex: 1 }}>
+                        <Typography variant="subtitle1" gutterBottom>
+                            Schauspieler im Film
+                        </Typography>
+
+                        {/* neue Schauspieler eingabe */}
+                        <Stack spacing={2} mb={3}>
+                            {newActorInputs.map((actor, index) => (
+                                <Stack direction="row" spacing={1} key={index}>
+                                    <TextField
+                                        label="Vorname"
+                                        value={actor.first_name}
+                                        onChange={(e) =>
+                                            handleActorInputChange(index, "first_name", e.target.value)
+                                        }
+                                        fullWidth
+                                    />
+                                    <TextField
+                                        label="Nachname"
+                                        value={actor.last_name}
+                                        onChange={(e) =>
+                                            handleActorInputChange(index, "last_name", e.target.value)
+                                        }
+                                        fullWidth
+                                    />
+                                </Stack>
+                            ))}
+                            <Button
+                                variant="outlined"
+                                onClick={handleAddActorInput}
+                                disabled={newActorInputs.length >= 5}
+                            >
+                                + Schauspieler
+                            </Button>
+                        </Stack>
+
+                        {/* bestehende Schauspieler anzeigen */}
+                        <Stack spacing={1}>
+                            {(input as FilmInputTypeEdit).actors?.length > 0 ? (
+                                (input as FilmInputTypeEdit).actors.map((actor) => (
+                                    <Stack
+                                        key={actor.actor_id}
+                                        direction="row"
+                                        spacing={2}
+                                        alignItems="center"
+                                    >
+                                        <span>{actor.first_name} {actor.last_name}</span>
+                                        <Button
+                                            variant="outlined"
+                                            color="error"
+                                            size="small"
+                                            onClick={() => handleRemoveActor(actor.actor_id)}
+                                        >
+                                            Entfernen
+                                        </Button>
+                                    </Stack>
+                                ))
+                            ) : (
+                                <Typography color="text.secondary">
+                                    Noch keine Schauspieler hinzugefügt
+                                </Typography>
+                            )}
+                        </Stack>
+                    </Box>
+                )}
 
             </Stack>
         </Box>
+
+
+
     );
 };
 
