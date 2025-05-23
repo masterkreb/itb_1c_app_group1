@@ -27,7 +27,6 @@ export interface FilmInputType {
     rental_duration?: string;
     replacement_cost?: string;
     language_id?: string;
-    special_features?: string;
 }
 
 // Validierungsstruktur für Eingabefelder
@@ -56,8 +55,6 @@ const defaultInput: FilmInputType = {
     rental_duration: "",
     replacement_cost: "",
     language_id: "",
-    special_features: "",
-
 };
 
 // Validierungsregeln nur für Pflichtfelder
@@ -130,13 +127,6 @@ const defaultValidation: ValidationFieldset = {
             required: true
         },
         message: "Sprache ist erforderlich",
-        valid: true
-    },
-    special_features: {
-        validation: {
-            required: true
-        },
-        message: "Special Features ist erforderlich",
         valid: true
     }
 };
@@ -442,15 +432,6 @@ const FilmPageForm = () => {
                                 </Typography>
                             )}
                         </FormControl>
-
-                        <TextField
-                            label="Special Features"
-                            value={input.special_features}
-                            onChange={(e) => handleInputChanged("special_features", e.target.value)}
-                            error={!validation.special_features?.valid}
-                            helperText={!validation.special_features?.valid ? validation.special_features?.message : ""}
-                            fullWidth
-                        />
 
                         <Button
                             variant="contained"
