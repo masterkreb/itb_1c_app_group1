@@ -1,73 +1,59 @@
-import React, { useEffect, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import { getFilmById, updateFilm, deleteFilm } from '../service/FilmService';
-import { Film, FilmRating } from '../types/types';
-import { Button, Stack, TextField, MenuItem, Typography} from '@mui/material';
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { createFilm } from '../service/FilmService';
+import { Film, Actor, FilmRating } from '../types/types';
+import { Button, Stack, TextField, MenuItem, Typography } from '@mui/material';
+import { Add } from '@mui/icons-material';
 
-const FilmFormular: React.FC = () => {
-    const { id } = useParams<{ id: string }>();
+const FilmErstellen: React.FC = () => {
     const navigate = useNavigate();
 
-    const [film, setFilm] = useState<Film | null>(null);
-    const [isLoading, setIsLoading] = useState<boolean>(true);
-
-    useEffect(() => {
-        const fetchFilm = async () => {
-            if (id) {
-                const data = await getFilmById(id);
-                if (data) {
-                    setFilm(data);
-                }
-            }
-            setIsLoading(false);
-        };
-
-        fetchFilm();
-    }, [id]);
+    const [film, setFilm] = useState<Film>({
+        title: '',
+        description: '',
+        release_year: '',
+        rental_duration: '',
+        rental_rate: '',
+        length: 0,
+        replacement_cost: '',
+        rating: '',
+        special_features: '',
+        actors: [],
+    });
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
-        if (film) {
-            setFilm({ ...film, [name]: value });
-        }
+        setFilm({ ...film, [name]: value });
+    };
+
+    const handleActorChange = (index: number, field: keyof Actor, value: string) => {
+        const updatedActors = [...(film.actors || [])];
+        updatedActors[index] = {
+            ...updatedActors[index],
+            [field]: field === "actor_id" ? Number(value) : value,
+        };
+        setFilm({ ...film, actors: updatedActors });
+    };
+
+    const handleAddActor = () => {
+        const newActor: Actor = { actor_id: 0, first_name: '', last_name: '' };
+        setFilm({ ...film, actors: [...(film.actors || []), newActor] });
     };
 
     const handleSave = async () => {
-        if (film && id) {
-            const updatedCount = await updateFilm(id, film);
-            if (updatedCount) {
-                alert(`Film erfolgreich aktualisiert.`);
-                navigate('/film');
-            } else {
-                alert('Fehler beim Aktualisieren des Films.');
-            }
+        const newFilmId = await createFilm(film);
+        if (newFilmId) {
+            alert(`Neuer Film erfolgreich erstellt.`);
+            navigate(`/film/details/${newFilmId}`);
+        } else {
+            alert('Fehler beim Erstellen des neuen Films.');
         }
     };
-
-    const handleDelete = async () => {
-        if (id && window.confirm('Möchten Sie diesen Film wirklich löschen?')) {
-            const success = await deleteFilm(id);
-            if (success) {
-                alert('Film erfolgreich gelöscht.');
-                navigate('/film');
-            } else {
-                alert('Fehler beim Löschen des Films.');
-            }
-        }
-    };
-
-    if (isLoading) {
-        return <Typography>Lädt...</Typography>;
-    }
-
-    if (!film) {
-        return <Typography>Film nicht gefunden.</Typography>;
-    }
 
     return (
         <div>
             <Typography variant="h4" gutterBottom>
-                Film bearbeiten
+                Neuen Film erstellen
             </Typography>
             <Stack spacing={2}>
                 <TextField
@@ -145,24 +131,33 @@ const FilmFormular: React.FC = () => {
                     fullWidth
                 />
 
-                {/* Schauspieler anzeigen und bearbeiten */}
-                <TextField
-                    label="Schauspieler (IDs durch Komma getrennt)"
-                    name="actors"
-                    value={film.actors?.map(actor => actor.actor_id).join(', ') || ''}
-                    onChange={handleChange}
-                    fullWidth
-                />
+                <Typography variant="h6">Schauspieler</Typography>
+                {film.actors?.map((actor, index) => (
+                    <Stack direction="row" spacing={2} key={index} alignItems="center">
+                        <TextField
+                            label="Vorname"
+                            value={actor.first_name}
+                            onChange={e => handleActorChange(index, 'first_name', e.target.value)}
+                            fullWidth
+                        />
+                        <TextField
+                            label="Nachname"
+                            value={actor.last_name}
+                            onChange={e => handleActorChange(index, 'last_name', e.target.value)}
+                            fullWidth
+                        />
+                    </Stack>
+                ))}
+                <Button variant="contained" color="primary" onClick={handleAddActor} startIcon={<Add />}>
+                    Schauspieler hinzufügen
+                </Button>
 
                 <Stack direction="row" spacing={2}>
                     <Button variant="contained" color="primary" onClick={handleSave}>
-                        Speichern
+                        Erstellen
                     </Button>
                     <Button variant="outlined" color="secondary" onClick={() => navigate('/film')}>
                         Zurück
-                    </Button>
-                    <Button variant="contained" color="error" onClick={handleDelete}>
-                        Löschen
                     </Button>
                 </Stack>
             </Stack>
@@ -170,4 +165,4 @@ const FilmFormular: React.FC = () => {
     );
 };
 
-export default FilmFormular;
+export default FilmErstellen;

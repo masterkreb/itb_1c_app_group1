@@ -63,6 +63,18 @@ const FilmPage: React.FC = () => {
                 Filme
             </Typography>
 
+            {/* Button für neuen Film */}
+            <Stack direction="row" spacing={2} mb={2} alignItems="center">
+                <Button
+                    component={Link}
+                    to="/film/neu"
+                    variant="contained"
+                    color="primary"
+                >
+                    Neuen Film erstellen
+                </Button>
+            </Stack>
+
             {/* Suchleiste */}
             <Stack direction="row" spacing={2} alignItems="center" mb={2}>
                 <TextField
@@ -110,7 +122,7 @@ const FilmPage: React.FC = () => {
                                             {/* Details-Navigation */}
                                             <Button
                                                 component={Link}
-                                                to={`/film/${film.film_id}`}
+                                                to={`/film/details/${film.film_id}`}
                                                 variant="outlined"
                                                 size="small"
                                             >
