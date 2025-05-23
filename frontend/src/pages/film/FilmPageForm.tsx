@@ -27,6 +27,7 @@ export interface FilmInputType {
     rental_duration?: string;
     replacement_cost?: string;
     language_id?: string;
+    special_features?: string;
     actors: { first_name: string; last_name: string }[];
 }
 
@@ -56,6 +57,7 @@ const defaultInput: FilmInputType = {
     rental_duration: "",
     replacement_cost: "",
     language_id: "",
+    special_features: "",
     actors: []
 };
 
@@ -409,6 +411,12 @@ const FilmPageForm = () => {
                                 <MenuItem value="6">Deutsch</MenuItem>
                             </Select>
                         </FormControl>
+                        <TextField
+                            label="Special Features"
+                            value={input.special_features}
+                            onChange={(e) => handleInputChanged("special_features", e.target.value)}
+                            fullWidth
+                        />
                         <Button
                             variant="contained"
                             color="primary"
