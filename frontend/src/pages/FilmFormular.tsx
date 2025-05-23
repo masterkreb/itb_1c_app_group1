@@ -2,14 +2,28 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { getFilmById, updateFilm, deleteFilm } from '../service/FilmService';
 import { Film, FilmRating } from '../types/types';
-import { Button, Stack, TextField, MenuItem, Typography} from '@mui/material';
+import {
+    Button,
+    Stack,
+    TextField,
+    MenuItem,
+    Typography,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogContentText,
+    DialogTitle,
+} from '@mui/material';
 
 const FilmFormular: React.FC = () => {
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
-
     const [film, setFilm] = useState<Film | null>(null);
     const [isLoading, setIsLoading] = useState<boolean>(true);
+
+    // Dialog States
+    const [deleteConfirmOpen, setDeleteConfirmOpen] = useState<boolean>(false);
+    const [deleteSuccessOpen, setDeleteSuccessOpen] = useState<boolean>(false);
 
     useEffect(() => {
         const fetchFilm = async () => {
@@ -44,14 +58,13 @@ const FilmFormular: React.FC = () => {
         }
     };
 
-    const handleDelete = async () => {
-        if (id && window.confirm('Möchten Sie diesen Film wirklich löschen?')) {
+    const handleDeleteConfirm = async () => {
+        setDeleteConfirmOpen(false);
+        if (id) {
             const success = await deleteFilm(id);
             if (success) {
-                alert('Film erfolgreich gelöscht.');
-                navigate('/film');
-            } else {
-                alert('Fehler beim Löschen des Films.');
+                setDeleteSuccessOpen(true);
+                setTimeout(() => navigate('/film'), 2000); // Navigate back after 2 seconds
             }
         }
     };
@@ -165,11 +178,50 @@ const FilmFormular: React.FC = () => {
                     <Button variant="outlined" color="secondary" onClick={() => navigate('/film')}>
                         Zurück
                     </Button>
-                    <Button variant="contained" color="error" onClick={handleDelete}>
+                    <Button variant="contained" color="error" onClick={() => setDeleteConfirmOpen(true)}>
                         Löschen
                     </Button>
                 </Stack>
             </Stack>
+
+            {/* Bestätigungs-Popup für Löschen */}
+            <Dialog
+                open={deleteConfirmOpen}
+                onClose={() => setDeleteConfirmOpen(false)}
+            >
+                <DialogTitle>Löschen bestätigen</DialogTitle>
+                <DialogContent>
+                    <DialogContentText>
+                        Sind Sie sicher, dass Sie diesen Film löschen möchten?
+                    </DialogContentText>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={() => setDeleteConfirmOpen(false)} color="secondary">
+                        Abbrechen
+                    </Button>
+                    <Button onClick={handleDeleteConfirm} color="error">
+                        Löschen
+                    </Button>
+                </DialogActions>
+            </Dialog>
+
+            {/* Erfolgs-Popup */}
+            <Dialog
+                open={deleteSuccessOpen}
+                onClose={() => setDeleteSuccessOpen(false)}
+            >
+                <DialogTitle>Erfolg</DialogTitle>
+                <DialogContent>
+                    <DialogContentText>
+                        Der Film wurde erfolgreich gelöscht.
+                    </DialogContentText>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={() => navigate('/film')} color="primary">
+                        Schließen
+                    </Button>
+                </DialogActions>
+            </Dialog>
         </div>
     );
 };
