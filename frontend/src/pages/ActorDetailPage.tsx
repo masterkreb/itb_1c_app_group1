@@ -62,9 +62,11 @@ const ActorDetailPage = () => {
     const loadAllFilms = async () => {
         try {
             const films = await getAllFilms();
-            setAllFilms(films);
-            if (films.length > 0) {
-                setSelectedFilmId(films[0].film_id || 0);
+            if (films) {
+                setAllFilms(films);
+                if (films.length > 0) {
+                    setSelectedFilmId(films[0].film_id || 0);
+                }
             }
         } catch (err: any) {
             console.error("Fehler beim Laden der Filme:", err);

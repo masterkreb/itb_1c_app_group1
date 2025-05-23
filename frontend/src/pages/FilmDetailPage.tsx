@@ -65,9 +65,11 @@ const FilmDetailPage = () => {
     const loadAllActors = async () => {
         try {
             const actors = await getAllActors();
-            setAllActors(actors);
-            if (actors.length > 0) {
-                setSelectedActorId(actors[0].actor_id);
+            if (actors) {
+                setAllActors(actors);
+                if (actors.length > 0) {
+                    setSelectedActorId(actors[0].actor_id);
+                }
             }
         } catch (err: any) {
             console.error("Fehler beim Laden der Schauspieler:", err);

@@ -9,11 +9,11 @@ const defaultFilm: Film = {
     title: "",
     description: "",
     release_year: new Date().getFullYear(),
-    rental_duration: 0,
-    rental_rate: 0,
-    length: 0,
-    replacement_cost: 0,
-    rating: "",
+    rental_duration: 3,
+    rental_rate: 4.99,
+    length: 120,
+    replacement_cost: 19.99,
+    rating: "PG",
     special_features: ""
 };
 

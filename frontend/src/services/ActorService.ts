@@ -6,166 +6,142 @@ const baseUrl = "http://localhost:3000/actor";
 
 /**
  * Ruft alle Schauspieler vom Server ab.
- * 
- * @example
- * // Beispiel: Alle Schauspieler abrufen und in einer Liste anzeigen
- * const actors = await getAllActors();
- * if (actors.length > 0) {
- *   // Schauspieler in UI anzeigen
- * }
- * 
- * @returns {Promise<Actor[]>} Array mit allen Schauspielern
- * @throws {Error} Bei Netzwerkfehlern oder Server-Fehlern
+ *
+ * @returns {Promise<Actor[] | undefined>} Array mit allen Schauspielern oder undefined bei Fehler
  */
-export async function getAllActors(): Promise<Actor[]> {
-    const response = await fetch(baseUrl);
+export async function getAllActors() {
+    console.log("Start GetActors")
+
+    const response = await fetch(baseUrl, {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json"
+        },
+    });
+    console.log("Got response from server: ", response);
     if (!response.ok) {
-        throw new Error(`Fehler beim Laden der Schauspieler: ${response.status} ${response.statusText}`);
+        console.error("Error while fetching actors: ", response.status);
+        return undefined;
     }
-    const data = await response.json();
-    return data.data as Actor[];
+
+    const tempActors = await response.json();
+    return tempActors.data;
 }
 
 /**
  * Ruft einen bestimmten Schauspieler anhand seiner ID ab.
  *
- * @example
- * // Beispiel: Schauspieler mit ID 1 abrufen und Details anzeigen
- * const actor = await getActorById(1);
- * if (actor) {
- *   // Schauspieler-Details anzeigen
- * } else {
- *   // Fehlermeldung anzeigen
- * }
- *
  * @param {number} id - Die ID des abzurufenden Schauspielers
  * @returns {Promise<Actor | null>} Der gefundene Schauspieler oder null bei Fehler
  */
-export async function getActorById(id: number): Promise<Actor | null> {
-    try {
-        const response = await fetch(`${baseUrl}/${id}`);
-        if (!response.ok) {
-            const errorData = await response.json().catch(() => ({}));
-            console.error(`Fehler beim Laden des Schauspielers (${response.status}):`, errorData);
-            throw new Error(`Schauspieler nicht gefunden: ${errorData.message || response.statusText}`);
-        }
-        const data = await response.json();
-        return data.data as Actor;
-    } catch (error) {
-        console.error("Fehler in getActorById:", error);
+export async function getActorById(id: number) {
+    console.log("Start GetActorById", id)
+
+    const response = await fetch(`${baseUrl}/${id}`, {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json"
+        },
+    });
+    console.log("Got response from server: ", response);
+    if (!response.ok) {
+        console.error("Error while fetching actor: ", response.status);
         return null;
     }
+
+    const tempActor = await response.json();
+    return tempActor.data;
 }
 
 /**
  * Erstellt einen neuen Schauspieler.
- * 
- * @example
- * // Beispiel: Neuen Schauspieler erstellen
- * const newActor = {
- *   first_name: "John",
- *   last_name: "Doe"
- * };
- * await createActor(newActor);
- * 
+ *
  * @param {Actor} actor - Die Daten des zu erstellenden Schauspielers
  * @returns {Promise<void>}
- * @throws {Error} Bei Netzwerkfehlern oder ungültigen Daten
  */
-export async function createActor(actor: Actor): Promise<void> {
+export async function createActor(actor: Actor) {
+    console.log("Start CreateActor", actor)
+
     const response = await fetch(baseUrl, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+            "Content-Type": "application/json"
+        },
         body: JSON.stringify(actor),
     });
-
+    console.log("Got response from server: ", response);
     if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(`Fehler beim Erstellen des Schauspielers: ${errorData.message || response.statusText}`);
+        console.error("Error while creating actor: ", response.status);
+        throw new Error(`Fehler beim Erstellen des Schauspielers: ${response.statusText}`);
     }
 }
 
 /**
  * Aktualisiert einen bestehenden Schauspieler.
- * 
- * @example
- * // Beispiel: Schauspieler mit ID 1 aktualisieren
- * const updatedActor = {
- *   first_name: "Max",
- *   last_name: "Mustermann"
- * };
- * await updateActor(1, updatedActor);
- * 
+ *
  * @param {number} id - Die ID des zu aktualisierenden Schauspielers
  * @param {Actor} actor - Die aktualisierten Schauspielerdaten
  * @returns {Promise<void>}
- * @throws {Error} Bei Netzwerkfehlern oder ungültigen Daten
  */
-export async function updateActor(id: number, actor: Actor): Promise<void> {
+export async function updateActor(id: number, actor: Actor) {
+    console.log("Start UpdateActor", id, actor)
+
     const response = await fetch(`${baseUrl}/${id}`, {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+            "Content-Type": "application/json"
+        },
         body: JSON.stringify(actor),
     });
-
+    console.log("Got response from server: ", response);
     if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(`Fehler beim Aktualisieren des Schauspielers: ${errorData.message || response.statusText}`);
+        console.error("Error while updating actor: ", response.status);
+        throw new Error(`Fehler beim Aktualisieren des Schauspielers: ${response.statusText}`);
     }
 }
 
 /**
  * Löscht einen Schauspieler anhand seiner ID.
- * 
- * @example
- * // Beispiel: Schauspieler mit ID 1 löschen
- * await deleteActor(1);
- * 
+ *
  * @param {number} id - Die ID des zu löschenden Schauspielers
  * @returns {Promise<void>}
- * @throws {Error} Bei Netzwerkfehlern oder wenn der Schauspieler nicht existiert
  */
-export async function deleteActor(id: number): Promise<void> {
+export async function deleteActor(id: number) {
+    console.log("Start DeleteActor", id)
+
     const response = await fetch(`${baseUrl}/${id}`, {
         method: "DELETE",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+            "Content-Type": "application/json"
+        },
     });
-
+    console.log("Got response from server: ", response);
     if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(`Fehler beim Löschen des Schauspielers: ${errorData.message || response.statusText}`);
+        console.error("Error while deleting actor: ", response.status);
+        throw new Error(`Fehler beim Löschen des Schauspielers: ${response.statusText}`);
     }
 }
 
 /**
  * Fügt einen Schauspieler zu einem Film hinzu (nutzt den Film-Endpunkt).
- * 
- * @example
- * // Beispiel: Schauspieler mit ID 1 zum Film mit ID 5 hinzufügen
- * await addActorToFilmFromActor(1, 5);
- * 
+ *
  * @param {number} actorId - Die ID des Schauspielers
  * @param {number} filmId - Die ID des Films, zu dem der Schauspieler hinzugefügt werden soll
  * @returns {Promise<void>}
- * @throws {Error} Bei Netzwerkfehlern oder wenn Film oder Schauspieler nicht existieren
  */
-export async function addActorToFilmFromActor(actorId: number, filmId: number): Promise<void> {
+export async function addActorToFilmFromActor(actorId: number, filmId: number) {
+    console.log("Start AddActorToFilmFromActor", actorId, filmId)
     await addActorToFilm(filmId, actorId);
 }
 
 /**
  * Entfernt einen Schauspieler von einem Film (nutzt den Film-Endpunkt).
- * 
- * @example
- * // Beispiel: Schauspieler mit ID 1 vom Film mit ID 5 entfernen
- * await removeActorFromFilmFromActor(1, 5);
- * 
+ *
  * @param {number} actorId - Die ID des Schauspielers
  * @param {number} filmId - Die ID des Films, von dem der Schauspieler entfernt werden soll
  * @returns {Promise<void>}
- * @throws {Error} Bei Netzwerkfehlern oder wenn die Verknüpfung nicht existiert
  */
-export async function removeActorFromFilmFromActor(actorId: number, filmId: number): Promise<void> {
+export async function removeActorFromFilmFromActor(actorId: number, filmId: number) {
+    console.log("Start RemoveActorFromFilmFromActor", actorId, filmId)
     await removeActorFromFilm(filmId, actorId);
 }
-
