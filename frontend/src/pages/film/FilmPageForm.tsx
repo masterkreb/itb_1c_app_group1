@@ -138,19 +138,17 @@ const defaultValidation: ValidationFieldset = {
 };
 
 /**
- * Diese Komponente zeigt ein Formular zum Erstellen oder Bearbeiten eines Films.
+ * Komponente für das Erstellen und Bearbeiten eines Films sowie das Verknüpfen von Schauspielern.
  *
- * @returns:
- * - Eingabefelder für Film-Informationen (z. B. Titel, Beschreibung, Länge, Rating usw.)
- * - Eingabefelder für neue Schauspieler
- * - Button zum Speichern
+ * @returns Ein Formular zum Erfassen oder Bearbeiten eines Films inkl. Eingabefelder für Film-Details
+ *          und Schauspieler-Management (Hinzufügen/Entfernen).
  *
- * State Variablen:
- * - `input`: Hält die Formulardaten für den Film
- * - `validation`: Validierungsstatus für Pflichtfelder
- * - `newActorInputs`: Neue Schauspieler zum Hinzufügen
+ * useParams holt die ID aus der URL um Film aus dem Server zu laden.
+ *
+ * @state input - Enthält die aktuellen Formulardaten des Films.
+ * @state validation - Validierungsstatus der Eingabefelder.
+ * @state newActorInputs - Felder für neue Schauspieler.
  */
-
 const FilmPageForm = () => {
     const { id } = useParams();
     const isEditMode = !!id; // prüfen ob edit oder neu
@@ -163,7 +161,11 @@ const FilmPageForm = () => {
 
     const [validation, setValidation] = useState<ValidationFieldset>({ ...defaultValidation });
 
-
+    /**
+     * Wird beim Laden der Seite ausgeführt.
+     * Wenn `id` vorhanden ist, wird der Film vom Server geladen und die Eingabefelder vorausgefüllt.
+     * Andernfalls wird das Formular mit leeren Standardwerten initialisiert.
+     */
     useEffect(() => {
         console.log("Film Page mounted");
         if (id) {
@@ -190,9 +192,9 @@ const FilmPageForm = () => {
     }, [id]);
 
     /**
-     * Aktualisiert ein Eingabefeld im Filmformular.
-     * @param {keyof FilmInputTypeCreate} key - Der Feldname (z. B. "title")
-     * @param {unknown} value - Der neue Wert
+     * Aktualisiert ein Eingabefeld im Formular.
+     * @param key - Der Feldname (z.B. "title", "description")
+     * @param value - Der neue Wert für das Eingabefeld
      */
     function handleInputChanged(key: keyof FilmInputTypeCreate, value: unknown): void {
         setInput({
@@ -200,12 +202,23 @@ const FilmPageForm = () => {
             [key]: value
         });
     }
+
+    /**
+     * Fügt ein weiteres Eingabefeld für einen neuen Schauspieler hinzu.
+     * Maximal 5 Eingabefelder sind erlaubt.
+     */
     function handleAddActorInput(): void {
         if (newActorInputs.length < 5) {
             setNewActorInputs([...newActorInputs, { first_name: "", last_name: "" }]);
         }
     }
 
+    /**
+     * Aktualisiert den Vor- oder Nachnamen eines Schauspielers im Eingabefeld.
+     * @param index - Index des Schauspielers im Eingabefeld-Array
+     * @param field - Entweder "first_name" oder "last_name"
+     * @param value - Der neue Wert
+     */
     function handleActorInputChange(
         index: number,
         field: "first_name" | "last_name",
@@ -216,6 +229,12 @@ const FilmPageForm = () => {
         setNewActorInputs(updated);
     }
 
+    /**
+     * Entfernt einen bestehenden Schauspieler aus dem Film.
+     * Zeigt eine Bestätigung an und ruft dann den Entfernen-Service auf.
+     *
+     * @param actor_id - Die ID des zu entfernenden Schauspielers
+     */
     async function handleRemoveActor(actor_id: number): Promise<void> {
         if (!isEditMode || !id) return;
 
@@ -243,11 +262,10 @@ const FilmPageForm = () => {
 
 
     /**
-     * Validiert das Formular anhand der Validierungsregeln in `defaultValidation`.
-     * Es überprüft jeden Wert (z. B. Titel, Beschreibung, Länge) und aktualisiert
-     * die `validation`-State mit Fehlermeldungen, falls notwendig.
+     * Validiert das Formular anhand der definierten Regeln für jedes Pflichtfeld.
+     * Setzt für jedes Feld den Validierungsstatus und zeigt entsprechende Fehlermeldungen an.
      *
-     * @returns {boolean} true wenn alle Pflichtfelder gültig sind, sonst false.
+     * @returns true wenn alle Pflichtfelder gültig sind, sonst false.
      */
     function validateForm(): boolean {
         let formIsValid = true;
@@ -306,10 +324,9 @@ const FilmPageForm = () => {
 
 
     /**
-     * Speichert den Film (neu oder bearbeitet).
-     * Führt vorher die Validierung durch und kombiniert alte + neue Schauspieler.
-     *
-     * @returns {Promise<void>}
+     * Speichert den Film (neu oder aktualisiert) nach erfolgreicher Validierung.
+     * Optional werden neue Schauspieler erstellt und mit dem Film verknüpft.
+     * Bei Erfolg wird zur Filmübersicht navigiert. Bei Fehler erscheint eine Fehlermeldung.
      */
     async function handleSaveClicked(): Promise<void> {
         if (!validateForm()) return;
