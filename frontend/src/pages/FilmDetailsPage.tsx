@@ -1,35 +1,53 @@
-// noinspection JSUnusedLocalSymbols.
-
 import React, {useEffect, useState} from 'react';
 import {useParams} from "react-router";
-import JsonView from "@uiw/react-json-view";
-import {Film} from "../types/types.ts"
+import {Film, Actor} from "../types/types.ts";
 import {getFilmById} from "../service/FilmService.ts";
-import {Card, CardContent, Typography, List, ListItem, Stack, Button} from "@mui/material";
+import {getAllActors} from "../service/ActorService.ts";
+import {Card, CardContent, Typography, List, ListItem, Stack, Button, Dialog, DialogTitle, DialogContent} from "@mui/material";
 
 const FilmDetailsPage = () => {
     const params = useParams<{id: string}>();
     const [film, setFilm] = React.useState<Film | null>(null);
+    const [showActorSelection, setShowActorSelection] = useState<boolean>(false);
+    const [availableActors, setAvailableActors] = useState<Actor[]>([]);
+    const [isLoading, setIsLoading] = React.useState<boolean>(false);
 
-
+    // Film laden
     useEffect(() => {
         if (params.id) {
             const filmId = Number(params.id);
-            if (isNaN(filmId)) {
-                console.error("Ungültige Film-ID");
-                return;
+            if (!isNaN(filmId)) {
+                getFilmById(filmId)
+                    .then(setFilm)
+                    .catch(error => console.error("Fehler beim Laden des Films:", error));
             }
-
-            getFilmById(filmId)
-                .then(response => {
-                    console.log("Empfangene Filmdaten:", response); // Debugging
-                    setFilm(response);
-                })
-                .catch(error => {
-                    console.error("Fehler beim Laden des Films:", error);
-                });
         }
     }, [params.id]);
+
+// useEffect für das Laden der Schauspieler
+useEffect(() => {
+    if (showActorSelection) {
+        setIsLoading(true);
+        getAllActors()
+            .then(actors => {
+                if (actors) {
+                    // Sortiere die Schauspieler alphabetisch nach Nachnamen, dann Vornamen
+                    const sortedActors = [...actors].sort((a, b) => {
+                        // Primär nach Nachnamen sortieren
+                        const lastNameComparison = a.last_name.localeCompare(b.last_name);
+                        // Bei gleichem Nachnamen nach Vornamen sortieren
+                        if (lastNameComparison === 0) {
+                            return a.first_name.localeCompare(b.first_name);
+                        }
+                        return lastNameComparison;
+                    });
+                    setAvailableActors(sortedActors);
+                }
+            })
+            .catch(error => console.error("Fehler beim Laden der Schauspieler:", error))
+            .finally(() => setIsLoading(false));
+    }
+}, [showActorSelection]);
 
     return (
         <div>
@@ -42,10 +60,43 @@ const FilmDetailsPage = () => {
                     <p>Beschreibung: {film.description}</p>
 
                     <Stack direction="row" spacing={2}>
-                        <Button variant={"contained"}>Add Actor</Button>
+                        <Button
+                            variant="contained"
+                            onClick={() => setShowActorSelection(true)}
+                        >
+                            Schauspieler hinzufügen
+                        </Button>
                     </Stack>
-                    
-                    <h4>Schauspieler:</h4>
+
+                    <Dialog
+                        open={showActorSelection}
+                        onClose={() => setShowActorSelection(false)}
+                        maxWidth="md"
+                        fullWidth
+                    >
+                        <DialogTitle>Verfügbare Schauspieler</DialogTitle>
+                        <DialogContent>
+                            {isLoading ? (
+                                <Typography>Lade Schauspieler...</Typography>
+                            ) : (
+                                <List>
+                                    {availableActors.map((actor) => (
+                                        <ListItem key={actor.actor_id}>
+                                            <Card sx={{width: '100%'}}>
+                                                <CardContent>
+                                                    <Typography variant="h6">
+                                                        {actor.first_name} {actor.last_name}
+                                                    </Typography>
+                                                </CardContent>
+                                            </Card>
+                                        </ListItem>
+                                    ))}
+                                </List>
+                            )}
+                        </DialogContent>
+                    </Dialog>
+
+                    <h4>Aktuelle Schauspieler:</h4>
                     {film.actors && film.actors.length > 0 ? (
                         <List>
                             {film.actors.map((actor) => (
@@ -63,9 +114,6 @@ const FilmDetailsPage = () => {
                     ) : (
                         <Typography>Keine Schauspieler verfügbar</Typography>
                     )}
-
-                    <h4>Rohdaten:</h4>
-                    <JsonView value={film} />
                 </>
             ) : (
                 <p>Keine Filmdaten verfügbar</p>
