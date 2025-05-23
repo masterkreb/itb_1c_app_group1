@@ -18,3 +18,17 @@ export async function getAllFilms() {
     const tempFilms = await response.json();
     return tempFilms.data;
 }
+
+export async function getFilmById(id: number) {
+    console.log("Start GetFilmById")
+    const response = await fetch(`${baseUrl}/${id}`, {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json"
+        },
+    });
+    console.log("Got response from server: ", response);
+    if (!response.ok) {
+        console.error("Error while fetching film: ", response.status);
+    }
+}
