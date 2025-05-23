@@ -81,6 +81,13 @@ const defaultValidation: ValidationFieldset = {
         message: "Beschreibung ist erforderlich",
         valid: true
     },
+    release_year: {
+        validation: {
+            required: true
+        },
+        message: "Jahr ist erforderlich",
+        valid: true
+    },
     length: {
         validation: {
             required: true,
@@ -89,6 +96,48 @@ const defaultValidation: ValidationFieldset = {
             pattern: /^\d+$/
         },
         message: "Länge ist erforderlich und muss eine Zahl sein.",
+        valid: true
+    },
+    rating: {
+        validation: {
+            required: true
+        },
+        message: "Rating ist erforderlich",
+        valid: true
+    },
+    rental_rate: {
+        validation: {
+            required: true
+        },
+        message: "Rental Rate ist erforderlich",
+        valid: true
+    },
+    rental_duration: {
+        validation: {
+            required: true
+        },
+        message: "Rental Duration ist erforderlich",
+        valid: true
+    },
+    replacement_cost: {
+        validation: {
+            required: true
+        },
+        message: "Replacement Cost ist erforderlich",
+        valid: true
+    },
+    language_id: {
+        validation: {
+            required: true
+        },
+        message: "Sprache ist erforderlich",
+        valid: true
+    },
+    special_features: {
+        validation: {
+            required: true
+        },
+        message: "Special Features ist erforderlich",
         valid: true
     }
 };
@@ -128,6 +177,8 @@ const FilmPageForm = () => {
                         rental_duration: String(data.rental_duration),
                         replacement_cost: String(data.replacement_cost),
                         language_id: String(data.language_id),
+                        rating: data.rating || "",
+                        special_features: data.special_features || "",
                         actors: data.actors || []
                     });
                     setValidation(defaultValidation);
@@ -193,8 +244,11 @@ const FilmPageForm = () => {
                 rental_duration: String(updated.rental_duration),
                 replacement_cost: String(updated.replacement_cost),
                 language_id: String(updated.language_id),
+                rating: updated.rating || "",
+                special_features: updated.special_features || "",
                 actors: updated.actors || []
             });
+
         } else {
             alert("Entfernen fehlgeschlagen.");
         }
@@ -345,8 +399,11 @@ const FilmPageForm = () => {
                             type="number"
                             value={input.release_year}
                             onChange={(e) => handleInputChanged("release_year", e.target.value)}
+                            error={!validation.release_year?.valid}
+                            helperText={!validation.release_year?.valid ? validation.release_year?.message : ""}
                             fullWidth
                         />
+
                         <TextField
                             label="Länge (Minuten) *"
                             type="number"
@@ -356,7 +413,7 @@ const FilmPageForm = () => {
                             helperText={!validation.length?.valid ? validation.length?.message : ""}
                             fullWidth
                         />
-                        <FormControl fullWidth>
+                        <FormControl fullWidth error={!validation.rating?.valid}>
                             <InputLabel id="rating-label">Rating</InputLabel>
                             <Select
                                 labelId="rating-label"
@@ -371,30 +428,45 @@ const FilmPageForm = () => {
                                 <MenuItem value="R">R</MenuItem>
                                 <MenuItem value="NC-17">NC-17</MenuItem>
                             </Select>
+                            {!validation.rating?.valid && (
+                                <Typography variant="caption" color="error">
+                                    {validation.rating?.message}
+                                </Typography>
+                            )}
                         </FormControl>
+
 
                         <TextField
                             label="Rental Rate"
                             type="number"
                             value={input.rental_rate}
                             onChange={(e) => handleInputChanged("rental_rate", e.target.value)}
+                            error={!validation.rental_rate?.valid}
+                            helperText={!validation.rental_rate?.valid ? validation.rental_rate?.message : ""}
                             fullWidth
                         />
+
                         <TextField
                             label="Rental Duration (Tage)"
                             type="number"
                             value={input.rental_duration}
                             onChange={(e) => handleInputChanged("rental_duration", e.target.value)}
+                            error={!validation.rental_duration?.valid}
+                            helperText={!validation.rental_duration?.valid ? validation.rental_duration?.message : ""}
                             fullWidth
                         />
+
                         <TextField
                             label="Replacement Cost"
                             type="number"
                             value={input.replacement_cost}
                             onChange={(e) => handleInputChanged("replacement_cost", e.target.value)}
+                            error={!validation.replacement_cost?.valid}
+                            helperText={!validation.replacement_cost?.valid ? validation.replacement_cost?.message : ""}
                             fullWidth
                         />
-                        <FormControl fullWidth>
+
+                        <FormControl fullWidth error={!validation.language_id?.valid}>
                             <InputLabel id="language-label">Sprache</InputLabel>
                             <Select
                                 labelId="language-label"
@@ -410,13 +482,22 @@ const FilmPageForm = () => {
                                 <MenuItem value="5">Französisch</MenuItem>
                                 <MenuItem value="6">Deutsch</MenuItem>
                             </Select>
+                            {!validation.language_id?.valid && (
+                                <Typography variant="caption" color="error">
+                                    {validation.language_id?.message}
+                                </Typography>
+                            )}
                         </FormControl>
+
                         <TextField
                             label="Special Features"
                             value={input.special_features}
                             onChange={(e) => handleInputChanged("special_features", e.target.value)}
+                            error={!validation.special_features?.valid}
+                            helperText={!validation.special_features?.valid ? validation.special_features?.message : ""}
                             fullWidth
                         />
+
                         <Button
                             variant="contained"
                             color="primary"
