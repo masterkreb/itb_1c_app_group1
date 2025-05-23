@@ -63,17 +63,6 @@ const FilmPage: React.FC = () => {
                 Filme
             </Typography>
 
-            {/* Button für neuen Film */}
-            <Stack direction="row" spacing={2} mb={2} alignItems="center">
-                <Button
-                    component={Link}
-                    to="/film/neu"
-                    variant="contained"
-                    color="primary"
-                >
-                    Neuen Film erstellen
-                </Button>
-            </Stack>
 
             {/* Suchleiste */}
             <Stack direction="row" spacing={2} alignItems="center" mb={2}>
@@ -152,6 +141,18 @@ const FilmPage: React.FC = () => {
                     </TableBody>
                 </Table>
             </TableContainer>
+            {/* Button für neuen Film */}
+            <Stack direction="row" spacing={2} mb={2} alignItems="center">
+                <Button
+                    component={Link}
+                    to="/film/neu"
+                    variant="contained"
+                    color="success"
+                >
+                    Neuen Film erstellen
+                </Button>
+            </Stack>
+
         </div>
     );
 };

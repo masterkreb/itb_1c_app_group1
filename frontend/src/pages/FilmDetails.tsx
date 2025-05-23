@@ -111,7 +111,7 @@ const FilmDetails: React.FC = () => {
                     component={Link}
                     to="/film/new"
                 >
-                    Neuen Film
+                    Neuen Film erstellen
                 </Button>
                 <Button
                     variant="outlined"
