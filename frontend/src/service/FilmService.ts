@@ -1,6 +1,6 @@
 // frontend/src/service/FilmService.ts
 
-import { Film } from "../types/types";
+import { Film} from "../types/types";
 
 const baseUrl = "http://localhost:3000/film";
 
@@ -57,7 +57,7 @@ export async function getFilmById(id: string): Promise<Film | undefined> {
 /**
  * Legt einen neuen Film an und gibt die neu erzeugte ID zurück.
  */
-export async function createFilm(film: Film): Promise<number | undefined> {
+export async function createFilm(film: Film): Promise<any> {
     const response = await fetch(baseUrl, {
         method: "POST",
         headers: { "Content-Type": "application/json" },

@@ -10,7 +10,7 @@ export interface Film {
     rating: string,
     special_features: string,
     actors?: Actor[]
-    categories?: Category[];
+    //categories?: Category[];
 }
 
 export interface Actor {

@@ -13,20 +13,25 @@ import {
     Button,
     Stack,
     TextField,
-    Typography
+    Typography,
+    TablePagination,
+    Dialog,
+    DialogTitle,
+    DialogContent,
+    DialogContentText,
+    DialogActions,
 } from '@mui/material';
 
 const FilmPage: React.FC = () => {
-    // Alle Filme
     const [films, setFilms] = useState<Film[]>([]);
-    // Suchbegriff für Title-Filter
     const [searchTerm, setSearchTerm] = useState<string>('');
+    const [page, setPage] = useState(0);
+    const rowsPerPage = 10;
 
-    /**
-     * Lädt Filme vom Server.
-     * Wird ohne Parameter aufgerufen => alle Filme
-     * Wird mit searchTerm aufgerufen => nur Titel, die so beginnen
-     */
+    // Dialog State
+    const [openDialog, setOpenDialog] = useState(false);
+    const [selectedFilmId, setSelectedFilmId] = useState<number | null>(null);
+
     const loadFilms = async (filter?: string) => {
         const data = await getAllFilms(filter);
         if (data) {
@@ -34,37 +39,38 @@ const FilmPage: React.FC = () => {
         }
     };
 
-    // Beim ersten Render ohne Filter laden
     useEffect(() => {
         loadFilms();
     }, []);
 
-    /**
-     * Löscht einen Film und lädt danach erneut (mit aktuellem Filter).
-     */
-    const handleDelete = async (id?: number) => {
-        if (!id) return;
-        // Sicherheitsabfrage
-        if (!window.confirm(`Film ${id} wirklich löschen?`)) return;
+    const confirmDelete = (id: number) => {
+        setSelectedFilmId(id);
+        setOpenDialog(true);
+    };
 
-        const success = await deleteFilm(id.toString());
+    const handleConfirmDelete = async () => {
+        if (!selectedFilmId) return;
+
+        const success = await deleteFilm(selectedFilmId.toString());
         if (success) {
-            // Nach dem Löschen mit dem aktuellen Suchbegriff neu laden
             loadFilms(searchTerm);
         } else {
             alert('Löschen fehlgeschlagen');
         }
+        setOpenDialog(false);
+        setSelectedFilmId(null);
+    };
+
+    const handleChangePage = (_: unknown, newPage: number) => {
+        setPage(newPage);
     };
 
     return (
         <div>
-            {/* Überschrift */}
             <Typography variant="h4" gutterBottom>
                 Filme
             </Typography>
 
-
-            {/* Suchleiste */}
             <Stack direction="row" spacing={2} alignItems="center" mb={2}>
                 <TextField
                     label="Search by title"
@@ -73,104 +79,123 @@ const FilmPage: React.FC = () => {
                     value={searchTerm}
                     onChange={e => setSearchTerm(e.target.value)}
                 />
-                <Button
-                    variant="contained"
-                    onClick={() => loadFilms(searchTerm)}  // Filter anwenden
-                >
+                <Button variant="contained" onClick={() => loadFilms(searchTerm)}>
                     Search
                 </Button>
                 <Button
                     variant="outlined"
                     onClick={() => {
-                        setSearchTerm('');  // Suchbegriff zurücksetzen
-                        loadFilms();        // alle Filme neu laden
+                        setSearchTerm('');
+                        loadFilms();
                     }}
                 >
                     Clear
                 </Button>
             </Stack>
-            {/* Button für neuen Film */}
+
             <Stack direction="row" spacing={2} mb={2} alignItems="center">
-                <Button
-                    component={Link}
-                    to="/film/neu"
-                    variant="contained"
-                    color="success"
-                >
+                <Button component={Link} to="/film/neu" variant="contained" color="success">
                     Neuen Film erstellen
                 </Button>
             </Stack>
 
-            {/* Tabelle */}
-            <TableContainer component={Paper}>
-                <Table aria-label="Filmtabelle">
-                    <TableHead>
-                        <TableRow>
-                            <TableCell>ID</TableCell>
-                            <TableCell>Titel</TableCell>
-                            <TableCell>Jahr</TableCell>
-                            <TableCell>Beschreibung</TableCell>
-                            <TableCell>Bewertung</TableCell>
-
-
-                            <TableCell align="right"></TableCell>
-                        </TableRow>
-                    </TableHead>
-                    <TableBody>
-                        {films.length > 0 ? (
-                            films.map(film => (
-                                <TableRow key={film.film_id}>
-                                    <TableCell>{film.film_id}</TableCell>
-                                    <TableCell>{film.title}</TableCell>
-                                    <TableCell>{film.release_year}</TableCell>
-                                    <TableCell>{film.description}</TableCell>
-                                    <TableCell>{film.rating}</TableCell>
-                                    <TableCell align="right">
-                                        <Stack direction="row" spacing={1} justifyContent="flex-end">
-                                            {/* Details-Navigation */}
-                                            <Button
-                                                component={Link}
-                                                to={`/film/details/${film.film_id}`}
-                                                variant="outlined"
-                                                size="small"
-                                            >
-                                                Details
-                                            </Button>
-                                            <Button
-                                                component={Link}
-                                                to={`/film/${film.film_id}`}
-                                                variant="contained"
-                                                size="small"
-
-                                            >
-                                               Bearbeiten
-                                            </Button>
-                                            {/* Löschen */}
-                                            <Button
-                                                variant="contained"
-                                                color="error"
-                                                size="small"
-                                                onClick={() => handleDelete(film.film_id)}
-                                            >
-                                                Löschen
-                                            </Button>
-                                        </Stack>
+            <Paper>
+                <TableContainer sx={{ maxHeight: 600 }}>
+                    <Table stickyHeader aria-label="Filmtabelle">
+                        <TableHead>
+                            <TableRow>
+                                <TableCell>ID</TableCell>
+                                <TableCell>Titel</TableCell>
+                                <TableCell>Jahr</TableCell>
+                                <TableCell>Beschreibung</TableCell>
+                                <TableCell>Bewertung</TableCell>
+                                <TableCell align="right"></TableCell>
+                            </TableRow>
+                        </TableHead>
+                        <TableBody>
+                            {films.length > 0 ? (
+                                films
+                                    .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                                    .map(film => (
+                                        <TableRow key={film.film_id}>
+                                            <TableCell>{film.film_id}</TableCell>
+                                            <TableCell>{film.title}</TableCell>
+                                            <TableCell>{film.release_year}</TableCell>
+                                            <TableCell>{film.description}</TableCell>
+                                            <TableCell>{film.rating}</TableCell>
+                                            <TableCell align="right">
+                                                <Stack direction="row" spacing={1} justifyContent="flex-end">
+                                                    <Button
+                                                        component={Link}
+                                                        to={`/film/details/${film.film_id}`}
+                                                        variant="outlined"
+                                                        size="small"
+                                                    >
+                                                        Details
+                                                    </Button>
+                                                    <Button
+                                                        component={Link}
+                                                        to={`/film/${film.film_id}`}
+                                                        variant="contained"
+                                                        size="small"
+                                                    >
+                                                        Bearbeiten
+                                                    </Button>
+                                                    <Button
+                                                        variant="contained"
+                                                        color="error"
+                                                        size="small"
+                                                        onClick={() => confirmDelete(film.film_id as number)}
+                                                    >
+                                                        Löschen
+                                                    </Button>
+                                                </Stack>
+                                            </TableCell>
+                                        </TableRow>
+                                    ))
+                            ) : (
+                                <TableRow>
+                                    <TableCell colSpan={6} align="center">
+                                        Keine Filme gefunden
                                     </TableCell>
                                 </TableRow>
-                            ))
-                        ) : (
-                            // Falls keine Filme (oder kein Treffer beim Filter)
-                            <TableRow>
-                                <TableCell colSpan={3} align="center">
-                                    Keine Filme gefunden
-                                </TableCell>
-                            </TableRow>
-                        )}
-                    </TableBody>
-                </Table>
-            </TableContainer>
+                            )}
+                        </TableBody>
+                    </Table>
+                </TableContainer>
 
+                <TablePagination
+                    component="div"
+                    count={films.length}
+                    page={page}
+                    onPageChange={handleChangePage}
+                    rowsPerPage={rowsPerPage}
+                    rowsPerPageOptions={[10]}
+                />
+            </Paper>
 
+            {/* MUI Bestätigungsdialog */}
+            <Dialog
+                open={openDialog}
+                onClose={() => setOpenDialog(false)}
+                aria-labelledby="confirm-dialog-title"
+                aria-describedby="confirm-dialog-description"
+            >
+                <DialogTitle id="confirm-dialog-title">Film löschen</DialogTitle>
+                <DialogContent>
+                    <DialogContentText id="confirm-dialog-description">
+                        Möchtest du diesen Film wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden.
+                    </DialogContentText>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={() => setOpenDialog(false)} color="primary">
+                        Abbrechen
+                    </Button>
+                    <Button onClick={handleConfirmDelete} color="error" variant="contained" autoFocus>
+                        Löschen
+                    </Button>
+                </DialogActions>
+            </Dialog>
         </div>
     );
 };
