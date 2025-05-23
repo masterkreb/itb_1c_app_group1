@@ -17,25 +17,34 @@ import {
 } from '@mui/material';
 
 /**
- * Funktion die die Detail-Seite eines Films rendert.
+ * Rendert die Detail-Seite für ein einzelnes Filmobjekt.
  *
  * @returns:
- * - Zeigt Filminformationen (ID, Titel, Beschreibung, Rating, Schauspieler).
- * - Bietet Buttons für Bearbeiten, Löschen und neuen Film erfassen.
+ * - Eine Tabelle mit Film-Daten (ID, Titel, Beschreibung, Rating, Schauspieler).
+ * - Drei Buttons: zum Bearbeiten, Löschen und für einen neuen Film.
  *
- * State Variablen:
- * - `film`: Speichert das aktuelle Filmobjekt.
+ * @state film - Speichert die geladenen Filmdaten.
+ *
+ * useParams holt die Film-ID aus der URL.
+ * useNavigate wird für Weiterleitung verwendet.
  */
-
 const FilmDetailsPage = () => {
-    const {id} = useParams();
+    const { id } = useParams();
     const [film, setFilm] = useState<any>(null);
     const navigate = useNavigate();
 
+    /**
+     * Navigiert zur Bearbeitungsseite für den aktuellen Film.
+     * Ist mit dem "Bearbeiten"-Button verknüpft.
+     */
     const handleEdit = () => {
         navigate(`/film/edit/${film.film_id}`);
     };
 
+    /**
+     * Löst die deleteFilm Funktion für die aktuelle ID aus, wenn jemand auf Löschen klickt.
+     * Bei erfolgreichem Löschen kehrt man zur film-Page zurück, ansonsten erscheint eine Fehlermeldung.
+     */
     const handleDelete = async () => {
         const confirmDelete = window.confirm("Willst du diesen Film wirklich löschen?");
         if (confirmDelete && film) {
@@ -51,6 +60,10 @@ const FilmDetailsPage = () => {
 
 
 
+    /**
+     * Lädt die Filmdaten basierend auf der ID aus der URL.
+     * Wenn keine Daten gefunden werden, bleibt `film` null.
+     */
 
     useEffect(() => {
         if (id) {
@@ -61,6 +74,11 @@ const FilmDetailsPage = () => {
             });
         }
     }, [id]);
+
+
+    /**
+     * Wenn der Film noch nicht geladen ist, zeigt eine Ladeanzeige.
+     */
 
     if (!film) {
         return <div>Film wird geladen...</div>;
@@ -96,7 +114,6 @@ const FilmDetailsPage = () => {
                     </TableBody>
                 </Table>
             </TableContainer>
-
             <div style={{marginTop: "20px", display: "flex", gap: "10px"}}>
                 <Button variant="contained" color="primary" onClick={handleEdit}>Bearbeiten</Button>
                 <Button variant="contained" color="error" onClick={handleDelete}>Löschen</Button>
