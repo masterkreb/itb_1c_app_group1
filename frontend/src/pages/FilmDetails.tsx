@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { getFilmById } from '../service/FilmService';
+import {deleteFilm, getFilmById} from '../service/FilmService';
 import { Film } from '../types/types';
 import { Typography, Stack, Paper, Table, TableBody, TableCell, TableRow, Button } from '@mui/material';
 
@@ -24,6 +24,20 @@ const FilmDetails: React.FC = () => {
 
         fetchFilmDetails();
     }, [id]);
+    /**
+     * Löscht einen Film und lädt danach erneut (mit aktuellem Filter).
+     */
+    const handleDelete = async () => {
+        if (id && window.confirm('Möchten Sie diesen Film wirklich löschen?')) {
+            const success = await deleteFilm(id);
+            if (success) {
+                alert('Film erfolgreich gelöscht.');
+                navigate('/film');
+            } else {
+                alert('Fehler beim Löschen des Films.');
+            }
+        }
+    };
 
     if (isLoading) {
         return <Typography>Lädt...</Typography>;
@@ -112,6 +126,13 @@ const FilmDetails: React.FC = () => {
                     to="/film/new"
                 >
                     Neuen Film erstellen
+                </Button>
+                {/* Löschen */}
+                <Button
+                    variant="contained"
+                    color="error"
+                    onClick={handleDelete}>
+                    Löschen
                 </Button>
                 <Button
                     variant="outlined"

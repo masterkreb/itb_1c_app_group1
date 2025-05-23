@@ -108,7 +108,12 @@ const FilmPage: React.FC = () => {
                         <TableRow>
                             <TableCell>ID</TableCell>
                             <TableCell>Titel</TableCell>
-                            <TableCell align="right">Aktionen</TableCell>
+                            <TableCell>Jahr</TableCell>
+                            <TableCell>Beschreibung</TableCell>
+                            <TableCell>Bewertung</TableCell>
+
+
+                            <TableCell align="right"></TableCell>
                         </TableRow>
                     </TableHead>
                     <TableBody>
@@ -117,6 +122,9 @@ const FilmPage: React.FC = () => {
                                 <TableRow key={film.film_id}>
                                     <TableCell>{film.film_id}</TableCell>
                                     <TableCell>{film.title}</TableCell>
+                                    <TableCell>{film.release_year}</TableCell>
+                                    <TableCell>{film.description}</TableCell>
+                                    <TableCell>{film.rating}</TableCell>
                                     <TableCell align="right">
                                         <Stack direction="row" spacing={1} justifyContent="flex-end">
                                             {/* Details-Navigation */}
@@ -128,7 +136,16 @@ const FilmPage: React.FC = () => {
                                             >
                                                 Details
                                             </Button>
-                                            {/* Direkt löschen */}
+                                            <Button
+                                                component={Link}
+                                                to={`/film/${film.film_id}`}
+                                                variant="contained"
+                                                size="small"
+
+                                            >
+                                               Bearbeiten
+                                            </Button>
+                                            {/* Löschen */}
                                             <Button
                                                 variant="contained"
                                                 color="error"
