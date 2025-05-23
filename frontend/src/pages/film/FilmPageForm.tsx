@@ -243,6 +243,7 @@ const FilmPageForm = () => {
 
         const success = await removeActorFromFilm(parseInt(id), actor_id);
         if (success) {
+
             setInput((prev) => {
                 const currentActors = (prev as FilmInputTypeEdit).actors || [];
                 const updatedActors = currentActors.filter((a) => a.actor_id !== actor_id);
@@ -252,6 +253,7 @@ const FilmPageForm = () => {
                     actors: updatedActors
                 } as FilmInputTypeEdit;
             });
+            alert("Schauspieler wurde entfernt.");
         } else {
             alert("Fehler beim Entfernen.");
         }
@@ -331,22 +333,24 @@ const FilmPageForm = () => {
     async function handleSaveClicked(): Promise<void> {
         if (!validateForm()) return;
 
-
-
         const sanitizedInput = Object.fromEntries(
             Object.entries(input).map(([key, val]) => [key, val === "" ? undefined : val])
         );
 
-
         delete sanitizedInput.film_id;
         console.log("GÖNDERİLEN VERİ:", sanitizedInput);
-
 
         const success = id
             ? await updateFilm(id, sanitizedInput)
             : await createFilm(sanitizedInput);
+
         if (success && id) {
-            for (const actor of newActorInputs.filter(a => a.first_name.trim() && a.last_name.trim())) {
+            for (const actor of newActorInputs) {
+                if (!actor.first_name.trim() || !actor.last_name.trim()) {
+                    alert("Bitte Vor- und Nachname für alle Schauspieler ausfüllen.");
+                    return;
+                }
+
                 const created = await createActor(actor);
                 if (created && typeof created === "number") {
                     await addActorToFilm(parseInt(id), created);
@@ -354,22 +358,13 @@ const FilmPageForm = () => {
             }
         }
 
-
-
-
-
         if (success) {
+            alert("Film wurde erfolgreich gespeichert.");
             setValidation(defaultValidation);
             navigate("/film");
-        } else {
-            alert("Fehler beim Speichern.");
         }
     }
-
-
-
-
-    return (
+        return (
         <Box sx={{ my: 4 }}>
             <Stack direction="row" spacing={4} alignItems="flex-start">
                 {/* Felder linke seite */}

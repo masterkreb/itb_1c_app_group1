@@ -50,6 +50,7 @@ const FilmDetailsPage = () => {
         if (confirmDelete && film) {
             const success = await deleteFilm(film.film_id.toString());
             if (success) {
+                alert("Film wurde erfolgreich gelöscht.");
                 navigate("/film");
             } else {
                 alert("Löschen fehlgeschlagen.");
