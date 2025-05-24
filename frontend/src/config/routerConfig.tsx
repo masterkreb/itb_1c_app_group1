@@ -7,7 +7,7 @@ import FilmFormPage from "../pages/FilmFormPage.tsx";
 import ActorListPage from "../pages/ActorListPage";
 import ActorFormPage from "../pages/ActorFormPage";
 import ActorDetailPage from "../pages/ActorDetailPage";
-import IndexPage from "../pages/IndexPage";
+
 
 export const router = createBrowserRouter([
     {
@@ -16,7 +16,7 @@ export const router = createBrowserRouter([
         children: [
             {
                 index: true,
-                element: <IndexPage />
+                element: <h1>Index</h1>
             },
             {
                 path: "film",
