@@ -350,7 +350,7 @@ const ActorPageForm = () => {
                             color="primary"
                             onClick={handleCreateAndNavigate}
                         >
-                            Schauspieler verknüpfen
+                            Film verknüpfen
                         </Button>
                     )}
 

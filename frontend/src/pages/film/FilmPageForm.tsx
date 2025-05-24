@@ -354,11 +354,6 @@ const FilmPageForm = () => {
             }
             for (const actor of newActorInputs.filter(a => a.first_name.trim() && a.last_name.trim())) {
 
-                if (!actor.first_name.trim() || !actor.last_name.trim()) {
-                    alert("Bitte Vor- und Nachname für alle Schauspieler ausfüllen.");
-                    return;
-                }
-
                 const created = await createActor(actor);
                 if (created && typeof created === "number") {
                     await addActorToFilm(parseInt(id), created);
