@@ -13,6 +13,7 @@ export interface Film {
 }
 
 export interface Actor {
+    last_update: any
     actor_id: number,
     first_name: string,
     last_name: string,
