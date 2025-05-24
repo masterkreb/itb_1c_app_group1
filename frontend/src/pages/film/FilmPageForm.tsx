@@ -345,6 +345,13 @@ const FilmPageForm = () => {
             : await createFilm(sanitizedInput);
 
         if (success && id) {
+            const hasIncompleteActor = newActorInputs.some(
+                (a) => (a.first_name.trim() && !a.last_name.trim()) || (!a.first_name.trim() && a.last_name.trim())
+            );
+            if (hasIncompleteActor) {
+                alert("Bitte alle Schauspieler vollständig ausfüllen oder leer lassen.");
+                return;
+            }
             for (const actor of newActorInputs.filter(a => a.first_name.trim() && a.last_name.trim())) {
 
                 if (!actor.first_name.trim() || !actor.last_name.trim()) {
