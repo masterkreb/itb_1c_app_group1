@@ -1,35 +1,45 @@
-import {createBrowserRouter} from "react-router";
-import App from "../App.tsx";
-import FilmPage from "../pages/FilmPage.tsx";
-import ActorPage from "../pages/ActorPage.tsx";
-import NotFoundPage from "../pages/NotFoundPage.tsx";
-import FilmDetailsPage from "../pages/FilmDetailsPage.tsx";
+import { createBrowserRouter } from "react-router"
+import App from "../App.tsx"
+import FilmPage from "../pages/FilmPage.tsx"
+import ActorPage from "../pages/ActorPage.tsx"
+import NotFoundPage from "../pages/NotFoundPage.tsx"
+import FilmDetailsPage from "../pages/FilmDetailsPage.tsx"
+import ActorDetailsPage from "../pages/ActorDetailsPage.tsx"
+import ActorEditPage from "../pages/ActorEditPage.tsx"
 
 export const router = createBrowserRouter([
     {
         path: "/",
-        element: <App/>,
+        element: <App />,
         children: [
             {
                 index: true,
-                element: <h1>Index</h1>
+                element: <h1>Index</h1>,
             },
             {
                 path: "film",
-                element: <FilmPage />
+                element: <FilmPage />,
             },
             {
                 path: "film/:id",
-                element: <FilmDetailsPage />
+                element: <FilmDetailsPage />,
             },
             {
                 path: "actor",
-                element: <ActorPage />
+                element: <ActorPage />,
+            },
+            {
+                path: "actor/:id",
+                element: <ActorDetailsPage />,
+            },
+            {
+                path: "actor/edit/:id",
+                element: <ActorEditPage />,
             },
             {
                 path: "*",
-                element: <NotFoundPage />
-            }
-        ]
+                element: <NotFoundPage />,
+            },
+        ],
     },
-]);
+])

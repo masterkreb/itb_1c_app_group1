@@ -1,130 +1,216 @@
 "use client"
 
-import { useEffect, useState, useCallback } from "react"
-import type { Actor } from "../types/types"
-import { getAllActors, deleteActor } from "../service/ActorService"
+import { useEffect, useState } from "react"
+import type { Actor } from "../types/types.ts"
+import { getAllActors } from "../service/ActorService.ts"
+import {
+    Card,
+    CardContent,
+    Typography,
+    List,
+    ListItem,
+    Stack,
+    Button,
+    Dialog,
+    DialogTitle,
+    DialogContent,
+    TextField,
+    Table,
+    TableBody,
+    TableCell,
+    TableContainer,
+    TableHead,
+    TableRow,
+    Paper,
+} from "@mui/material"
 
-/**
- * Komponente zur Anzeige der Liste von Schauspielern
- * @returns JSX.Element
- */
 const ActorPage = () => {
     const [actors, setActors] = useState<Actor[]>([])
-    const [loading, setLoading] = useState<boolean>(true)
-    const [error, setError] = useState<string | null>(null)
+    const [selectedActor, setSelectedActor] = useState<Actor | null>(null)
+    const [showViewDialog, setShowViewDialog] = useState<boolean>(false)
+    const [showEditDialog, setShowEditDialog] = useState<boolean>(false)
+    const [showAddDialog, setShowAddDialog] = useState<boolean>(false)
+    const [firstName, setFirstName] = useState<string>("")
+    const [lastName, setLastName] = useState<string>("")
 
-    /**
-     * Lädt alle Schauspieler beim Mounten der Komponente
-     */
-    const fetchActors = useCallback(async () => {
-        try {
-            setLoading(true)
-            const data = await getAllActors()
-            setActors(data)
-            setError(null)
-        } catch (err: unknown) {
-            const errorMessage = err instanceof Error ? err.message : "Unbekannter Fehler"
-            setError(`Fehler beim Laden der Schauspieler: ${errorMessage}`)
-        } finally {
-            setLoading(false)
-        }
+    // Actors laden
+    useEffect(() => {
+        getAllActors()
+            .then((actorData) => {
+                if (actorData) {
+                    setActors(actorData)
+                }
+            })
+            .catch((error) => console.error("Fehler beim Laden der Schauspieler:", error))
     }, [])
 
-    useEffect(() => {
-        fetchActors()
-    }, [fetchActors])
+    const handleView = (actor: Actor) => {
+        setSelectedActor(actor)
+        setShowViewDialog(true)
+    }
 
-    /**
-     * Behandelt das Löschen eines Schauspielers
-     * @param {string} id - ID des zu löschenden Schauspielers
-     */
-    const handleDelete = async (id: string) => {
-        const confirmed = window.confirm("Sind Sie sicher, dass Sie diesen Schauspieler löschen möchten?")
-        if (!confirmed) return
+    const handleEdit = (actor: Actor) => {
+        setSelectedActor(actor)
+        setFirstName(actor.first_name)
+        setLastName(actor.last_name)
+        setShowEditDialog(true)
+    }
 
-        try {
-            await deleteActor(id)
-            setActors((prevActors) => prevActors.filter((actor) => actor.actor_id !== id))
-        } catch (err: unknown) {
-            const errorMessage = err instanceof Error ? err.message : "Unbekannter Fehler"
-            setError(`Fehler beim Löschen des Schauspielers: ${errorMessage}`)
+    const handleAdd = () => {
+        setFirstName("")
+        setLastName("")
+        setShowAddDialog(true)
+    }
+
+    const handleSave = () => {
+        console.log("Speichern:", { firstName, lastName })
+        // Hier würdest du die Update-Logik implementieren
+        setShowEditDialog(false)
+        // Actors neu laden
+    }
+
+    const handleCreate = () => {
+        console.log("Erstellen:", { firstName, lastName })
+        // Hier würdest du die Create-Logik implementieren
+        setShowAddDialog(false)
+        // Actors neu laden
+    }
+
+    const handleDelete = (actor: Actor) => {
+        if (confirm(`Schauspieler ${actor.first_name} ${actor.last_name} wirklich löschen?`)) {
+            console.log("Löschen:", actor)
+            // Hier würdest du die Delete-Logik implementieren
+            // Actors neu laden
         }
     }
 
-    /**
-     * Navigiert zu einer anderen Seite
-     * @param {string} path - Pfad zur Zielseite
-     */
-    const navigate = (path: string) => {
-        window.location.href = path
-    }
-
-    if (loading) {
-        return <div className="loading">Schauspieler werden geladen...</div>
-    }
-
-    if (error) {
-        return (
-            <div className="error">
-                <p>{error}</p>
-                <button onClick={() => fetchActors()}>Erneut versuchen</button>
-            </div>
-        )
+    const closeDialogs = () => {
+        setShowViewDialog(false)
+        setShowEditDialog(false)
+        setShowAddDialog(false)
+        setSelectedActor(null)
     }
 
     return (
-        <div className="actor-page">
-            <div className="page-header">
+        <div>
+            <Stack direction="row" justifyContent="space-between" alignItems="center" mb={3}>
                 <h2>Schauspielerliste</h2>
-                <button onClick={() => navigate("/actor/new")} className="button button-primary">
+                <Button variant="contained" onClick={handleAdd}>
                     Neuen Schauspieler hinzufügen
-                </button>
-            </div>
+                </Button>
+            </Stack>
 
-            {actors.length === 0 ? (
-                <div className="empty-state">
-                    <p>Keine Schauspieler verfügbar</p>
-                    <button onClick={() => navigate("/actor/new")} className="button">
-                        Ersten Schauspieler erstellen
-                    </button>
-                </div>
-            ) : (
-                <div className="table-container">
-                    <table className="data-table">
-                        <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Vorname</th>
-                            <th>Nachname</th>
-                            <th>Aktionen</th>
-                        </tr>
-                        </thead>
-                        <tbody>
+            <TableContainer component={Paper}>
+                <Table>
+                    <TableHead>
+                        <TableRow>
+                            <TableCell>ID</TableCell>
+                            <TableCell>Vorname</TableCell>
+                            <TableCell>Nachname</TableCell>
+                            <TableCell>Aktionen</TableCell>
+                        </TableRow>
+                    </TableHead>
+                    <TableBody>
                         {actors.map((actor) => (
-                            <tr key={actor.actor_id}>
-                                <td>{actor.actor_id}</td>
-                                <td>{actor.first_name}</td>
-                                <td>{actor.last_name}</td>
-                                <td className="actions">
-                                    <button onClick={() => navigate(`/actor/${actor.actor_id}`)} className="button button-small">
-                                        Ansehen
-                                    </button>
-                                    <button
-                                        onClick={() => navigate(`/actor/edit/${actor.actor_id}`)}
-                                        className="button button-small button-secondary"
-                                    >
-                                        Bearbeiten
-                                    </button>
-                                    <button onClick={() => handleDelete(actor.actor_id)} className="button button-small button-danger">
-                                        Löschen
-                                    </button>
-                                </td>
-                            </tr>
+                            <TableRow key={`actor-${actor.actor_id}`}>
+                                <TableCell>{actor.actor_id}</TableCell>
+                                <TableCell>{actor.first_name}</TableCell>
+                                <TableCell>{actor.last_name}</TableCell>
+                                <TableCell>
+                                    <Stack direction="row" spacing={1}>
+                                        <Button size="small" onClick={() => handleView(actor)}>
+                                            Ansehen
+                                        </Button>
+                                        <Button size="small" onClick={() => handleEdit(actor)}>
+                                            Bearbeiten
+                                        </Button>
+                                        <Button size="small" color="error" onClick={() => handleDelete(actor)}>
+                                            Löschen
+                                        </Button>
+                                    </Stack>
+                                </TableCell>
+                            </TableRow>
                         ))}
-                        </tbody>
-                    </table>
-                </div>
-            )}
+                    </TableBody>
+                </Table>
+            </TableContainer>
+
+            {/* Dialog für Ansehen */}
+            <Dialog open={showViewDialog} onClose={closeDialogs} maxWidth="md" fullWidth>
+                <DialogTitle>Schauspieler Details</DialogTitle>
+                <DialogContent>
+                    {selectedActor && (
+                        <Card>
+                            <CardContent>
+                                <Typography variant="h6">
+                                    {selectedActor.first_name} {selectedActor.last_name}
+                                </Typography>
+                                <Typography variant="body2" color="text.secondary">
+                                    ID: {selectedActor.actor_id}
+                                </Typography>
+
+                                <h4>Filme:</h4>
+                                {selectedActor.films && selectedActor.films.length > 0 ? (
+                                    <List>
+                                        {selectedActor.films.map((film) => (
+                                            <ListItem key={`film-${film.film_id}`}>
+                                                <Card sx={{ width: "100%" }}>
+                                                    <CardContent>
+                                                        <Typography variant="h6">{film.title}</Typography>
+                                                        <Typography variant="body2" color="text.secondary">
+                                                            {film.description}
+                                                        </Typography>
+                                                    </CardContent>
+                                                </Card>
+                                            </ListItem>
+                                        ))}
+                                    </List>
+                                ) : (
+                                    <Typography>Keine Filme verfügbar</Typography>
+                                )}
+                            </CardContent>
+                        </Card>
+                    )}
+                </DialogContent>
+            </Dialog>
+
+            {/* Dialog für Bearbeiten */}
+            <Dialog open={showEditDialog} onClose={closeDialogs} maxWidth="sm" fullWidth>
+                <DialogTitle>Schauspieler bearbeiten</DialogTitle>
+                <DialogContent>
+                    <Stack spacing={3} sx={{ mt: 2 }}>
+                        <TextField label="Vorname" value={firstName} onChange={(e) => setFirstName(e.target.value)} fullWidth />
+                        <TextField label="Nachname" value={lastName} onChange={(e) => setLastName(e.target.value)} fullWidth />
+                        <Stack direction="row" spacing={2} justifyContent="center">
+                            <Button variant="contained" onClick={handleSave}>
+                                Speichern
+                            </Button>
+                            <Button variant="outlined" onClick={closeDialogs}>
+                                Abbrechen
+                            </Button>
+                        </Stack>
+                    </Stack>
+                </DialogContent>
+            </Dialog>
+
+            {/* Dialog für Hinzufügen */}
+            <Dialog open={showAddDialog} onClose={closeDialogs} maxWidth="sm" fullWidth>
+                <DialogTitle>Neuen Schauspieler hinzufügen</DialogTitle>
+                <DialogContent>
+                    <Stack spacing={3} sx={{ mt: 2 }}>
+                        <TextField label="Vorname" value={firstName} onChange={(e) => setFirstName(e.target.value)} fullWidth />
+                        <TextField label="Nachname" value={lastName} onChange={(e) => setLastName(e.target.value)} fullWidth />
+                        <Stack direction="row" spacing={2} justifyContent="center">
+                            <Button variant="contained" onClick={handleCreate} disabled={!firstName || !lastName}>
+                                Erstellen
+                            </Button>
+                            <Button variant="outlined" onClick={closeDialogs}>
+                                Abbrechen
+                            </Button>
+                        </Stack>
+                    </Stack>
+                </DialogContent>
+            </Dialog>
         </div>
     )
 }

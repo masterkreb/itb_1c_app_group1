@@ -1,5 +1,7 @@
+import {Actor} from "../types/types.ts";
+
 const baseUrl = "http://localhost:3000/actor";
-//
+
 export async function getAllActors() {
     console.log("Start GetActors")
 
@@ -19,16 +21,40 @@ export async function getAllActors() {
     return tempActors.data;
 }
 
-export async function getActorById(id: number) {
-    console.log("Start GetActorById")
+export async function getActorById(id: number): Promise<Actor> {
+    console.log("Start GetActorById");
     const response = await fetch(`${baseUrl}/${id}`, {
         method: "GET",
         headers: {
             "Content-Type": "application/json"
         },
     });
+
     console.log("Got response from server: ", response);
+
     if (!response.ok) {
-        console.error("Error while fetching actor: ", response.status);
+        throw new Error(`Fehler beim Laden des Schauspielers: ${response.status}`);
     }
+
+    const result = await response.json();
+    return result.data;
+}
+
+export async function deleteActor(id: number) {
+    console.log("Start DeleteActor");
+    const response = await fetch(`${baseUrl}/${id}`, {
+        method: "DELETE",
+        headers: {
+            "Content-Type": "application/json"
+        },
+    });
+
+    console.log("Got response from server: ", response);
+
+    if (!response.ok) {
+        console.error("Error while deleting actor: ", response.status);
+        return false;
+    }
+
+    return true;
 }
