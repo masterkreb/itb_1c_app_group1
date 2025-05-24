@@ -1,9 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { TextField, Button, Stack, Typography, FormControl, InputLabel, Select, MenuItem, Checkbox, OutlinedInput, ListItemText } from '@mui/material';
-import { createActor } from '../service/ActorService';
+import {
+    TextField, Button, Stack, Typography,
+    FormControl, InputLabel, Select, MenuItem,
+    Checkbox, OutlinedInput, ListItemText
+} from '@mui/material';
+import { createActor, addFilmToActor } from '../service/ActorService';
 import { getAllFilms } from '../service/FilmService';
-import { Film} from '../types/types';
+import { Film } from '../types/types';
 
 const ActorErstellen: React.FC = () => {
     const navigate = useNavigate();
@@ -58,6 +62,14 @@ const ActorErstellen: React.FC = () => {
 
         try {
             const newId = await createActor(newActor);
+
+            // Filme dem neuen Schauspieler zuordnen
+            for (const filmId of selectedFilmIds) {
+                if (typeof newId === "number") {
+                    await addFilmToActor(filmId, newId);
+                }
+            }
+
             alert('Schauspieler erfolgreich erstellt.');
             navigate(`/actor/details/${newId}`);
         } catch (error) {
@@ -114,7 +126,8 @@ const ActorErstellen: React.FC = () => {
                     >
                         {availableFilms.map((film) => (
                             <MenuItem key={film.film_id} value={film.film_id}>
-                                <Checkbox checked={selectedFilmIds.includes(film.film_id as number)} />
+                                <Checkbox checked={film.film_id !== undefined && selectedFilmIds.includes(film.film_id)} />
+
                                 <ListItemText primary={film.title} />
                             </MenuItem>
                         ))}

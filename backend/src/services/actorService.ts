@@ -9,11 +9,22 @@ export async function getAllActors(): Promise<any[]> {
     return db()("actor").select("*");
 }
 
-/**
- * Holt einen einzelnen Actor nach ID.
- */
 export async function getActorById(id: number): Promise<any> {
-    return db()("actor").where("actor_id", id).first();
+    // 1. Actor selbst holen
+    const actor = await db()("actor").where("actor_id", id).first();
+
+    if (!actor) return null;
+
+    // 2. Zugeordnete Filme über Join abfragen
+    const films = await db()("film")
+        .join("actor_film", "film.film_id", "actor_film.film_id")
+        .where("actor_film.actor_id", id)
+        .select("film.film_id", "film.title");
+
+    // 3. Filme anhängen
+    actor.films = films;
+
+    return actor;
 }
 
 /**

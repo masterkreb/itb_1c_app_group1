@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { getFilmById, updateFilm, deleteFilm } from '../service/FilmService';
-import { Film, FilmRating } from '../types/types';
+import { getAllActors, addFilmToActor } from '../service/ActorService';
+import { Film, FilmRating, Actor } from '../types/types';
 import {
     Button,
     Stack,
@@ -25,9 +26,11 @@ const FilmFormular: React.FC = () => {
     const [film, setFilm] = useState<Film | null>(null);
     const [errors, setErrors] = useState<ValidationError>({});
     const [isLoading, setIsLoading] = useState(true);
-
     const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
     const [deleteSuccessOpen, setDeleteSuccessOpen] = useState(false);
+
+    const [allActors, setAllActors] = useState<Actor[]>([]);
+    const [selectedActorId, setSelectedActorId] = useState('');
 
     useEffect(() => {
         const fetchFilm = async () => {
@@ -38,6 +41,12 @@ const FilmFormular: React.FC = () => {
             setIsLoading(false);
         };
         fetchFilm();
+
+        const fetchActors = async () => {
+            const actors = await getAllActors();
+            setAllActors(actors ?? []);
+        };
+        fetchActors();
     }, [id]);
 
     const validateField = (name: string, value: any): string => {
@@ -126,6 +135,22 @@ const FilmFormular: React.FC = () => {
         }
     };
 
+    const handleAddActor = async () => {
+        if (!id || !selectedActorId) return;
+        await addFilmToActor(Number(id), Number(selectedActorId));
+        alert('Schauspieler erfolgreich hinzugefügt.');
+
+        const updatedFilm = await getFilmById(id);
+        if (updatedFilm) {
+            setFilm(updatedFilm);
+        } else {
+            setFilm(null); // oder z. B. alert('Film nicht gefunden');
+        }
+
+        setSelectedActorId('');
+    };
+
+
     if (isLoading) return <Typography>Lädt...</Typography>;
     if (!film) return <Typography>Film nicht gefunden.</Typography>;
 
@@ -181,6 +206,29 @@ const FilmFormular: React.FC = () => {
                     fullWidth
                 />
 
+                {/* Neue Auswahl für Schauspieler hinzufügen */}
+                <Stack direction="row" spacing={2} alignItems="center">
+                    <TextField
+                        select
+                        label="Schauspieler hinzufügen"
+                        value={selectedActorId}
+                        onChange={(e) => setSelectedActorId(e.target.value)}
+                        fullWidth
+                    >
+                        {allActors.map((actor) => (
+                            <MenuItem key={actor.actor_id} value={actor.actor_id}>
+                                {actor.first_name} {actor.last_name}
+                            </MenuItem>
+                        ))}
+                    </TextField>
+                    <Button
+                        variant="outlined"
+                        onClick={handleAddActor}
+                        disabled={!selectedActorId}
+                    >
+                        Hinzufügen
+                    </Button>
+                </Stack>
 
                 <Stack direction="row" spacing={2}>
                     <Button variant="contained" color="primary" onClick={handleSave}>Speichern</Button>

@@ -1,5 +1,6 @@
 import { Actor } from '../types/types';
 
+
 const baseUrl = 'http://localhost:3000/actor'; // Singular passend zum Backend
 
 interface ApiResponse<T> {
@@ -34,24 +35,21 @@ export async function getAllActors(): Promise<Actor[] | undefined> {
  * @param id ID des Schauspielers
  * @returns Actor-Objekt oder undefined bei Fehler
  */
-export async function getActorById(id: string): Promise<Actor | undefined> {
-    console.log(`Start getActorById: ${id}`);
+export async function getActorById(id: string): Promise<Actor | null> {
+    try {
+        const response = await fetch(`/api/actor/${id}`);
+        if (!response.ok) {
+            console.error('Fehler beim Laden des Schauspielers:', response.statusText);
+            return null;
+        }
 
-    const response = await fetch(`${baseUrl}/${id}`, {
-        method: 'GET',
-        headers: { 'Content-Type': 'application/json' }
-    });
-
-    if (!response.ok) {
-        console.error(`Error while fetching actor with id ${id}:`, response.status);
-        return undefined;
+        const data = await response.json();
+        return data;
+    } catch (error) {
+        console.error('Fehler beim Laden des Schauspielers:', error);
+        return null;
     }
-
-    const payload = (await response.json()) as ApiResponse<Actor>;
-    console.log('Successfully getActorById', payload.data);
-    return payload.data;
 }
-
 /**
  * Legt einen neuen Schauspieler an und gibt die neue ID zurück.
  * @param actor Objekt mit first_name und last_name
