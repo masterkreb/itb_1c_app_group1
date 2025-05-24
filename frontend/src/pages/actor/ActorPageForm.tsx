@@ -55,7 +55,7 @@ const defaultValidation: ValidationFieldset = {
             required: true,
             minLength: 2,
             maxLength: 25,
-            pattern: /^[A-Za-zÄÖÜäöüßÉÈÊËéèêëÀÂàâÇçÑñ\-'\s]+$/
+            pattern: /^[A-Za-zÄÖÜäöüßÉÈÊËéèêëÀÂàâÇçÑñ](?:[A-Za-zÄÖÜäöüßÉÈÊËéèêëÀÂàâÇçÑñ\-'\s]*[A-Za-zÄÖÜäöüßÉÈÊËéèêëÀÂàâÇçÑñ])?$/
         },
         message: "Vorname muss zwischen 2 und 25 Zeichen lang sein.",
         valid: true
@@ -65,7 +65,7 @@ const defaultValidation: ValidationFieldset = {
             required: true,
             minLength: 2,
             maxLength: 25,
-            pattern: /^[A-Za-zÄÖÜäöüßÉÈÊËéèêëÀÂàâÇçÑñ\-'\s]+$/,
+            pattern: /^[A-Za-zÄÖÜäöüßÉÈÊËéèêëÀÂàâÇçÑñ](?:[A-Za-zÄÖÜäöüßÉÈÊËéèêëÀÂàâÇçÑñ\-'\s]*[A-Za-zÄÖÜäöüßÉÈÊËéèêëÀÂàâÇçÑñ])?$/
         },
         message: "Nachname muss zwischen 2 und 25 Zeichen lang sein.",
         valid: true
