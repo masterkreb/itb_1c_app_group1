@@ -85,7 +85,7 @@ const defaultValidation: ValidationFieldset = {
     },
     release_year: {
         validation: {
-            required: true
+            required: false
         },
         message: "Jahr ist erforderlich",
         valid: true
@@ -102,28 +102,28 @@ const defaultValidation: ValidationFieldset = {
     },
     rating: {
         validation: {
-            required: true
+            required: false
         },
         message: "Rating ist erforderlich",
         valid: true
     },
     rental_rate: {
         validation: {
-            required: true
+            required: false
         },
         message: "Rental Rate ist erforderlich",
         valid: true
     },
     rental_duration: {
         validation: {
-            required: true
+            required: false
         },
         message: "Rental Duration ist erforderlich",
         valid: true
     },
     replacement_cost: {
         validation: {
-            required: true
+            required: false
         },
         message: "Replacement Cost ist erforderlich",
         valid: true
