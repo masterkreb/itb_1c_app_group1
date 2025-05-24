@@ -60,7 +60,21 @@ export async function getFilmById(id: number): Promise<Film> {
     return result.data
 }
 
-
+/**
+ * Erstellt einen neuen Film in der Datenbank
+ * @param {Partial<Film>} filmData - Die Daten des zu erstellenden Films. Partial erlaubt teilweise Film-Objekte
+ * @returns {Promise<any>} Das erstellte Film-Objekt mit seiner ID
+ * @throws {Error} Wenn die Erstellung fehlschlägt mit dem HTTP-Statuscode
+ * @example
+ * const newFilm = await createFilm({
+ *   title: "Neuer Film",
+ *   description: "Eine Beschreibung",
+ *   rental_rate: 4.99,
+ *   rental_duration: 3,
+ *   language_id: 1,
+ *   release_year: 2024
+ * });
+ */
 
 export async function createFilm(filmData: Partial<Film>) {
     const response = await fetch(`${baseUrl}`, {

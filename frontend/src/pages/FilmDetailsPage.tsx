@@ -13,6 +13,12 @@ const FilmDetailsPage = () => {
     const [isLoading, setIsLoading] = React.useState<boolean>(false);
     const [message, setMessage] = React.useState<{text: string, type: 'success' | 'error'} | null>(null);
 
+    /**
+     * Fügt einen Schauspieler zu einem Film hinzu
+     * @param {Actor} actor - Der hinzuzufügende Schauspieler
+     * @returns {Promise<void>}
+     * @throws {Error} Wenn die Film-ID nicht definiert ist oder beim Hinzufügen ein Fehler auftritt
+     */
     const handleAddActor = async (actor: Actor) => {
         if (!film) return;
 
@@ -45,6 +51,13 @@ const FilmDetailsPage = () => {
         }
     };
 
+    /**
+     * Entfernt einen Schauspieler von einem Film
+     * @param {number} filmId - Die ID des Films
+     * @param {number} actorId - Die ID des zu entfernenden Schauspielers
+     * @returns {Promise<void>}
+     * @throws {Error} Wenn beim Entfernen ein Fehler auftritt
+     */
     const handleRemoveActor = async (filmId: number, actorId: number) => {
         try {
             // Service-Funktion aufrufen um den Schauspieler vom Film zu entfernen
@@ -65,7 +78,10 @@ const FilmDetailsPage = () => {
     };
 
 
-    // Filtere bereits zugewiesene Schauspieler aus der verfügbaren Liste
+    /**
+     * Filtert die verfügbaren Schauspieler, um bereits zugewiesene auszuschließen
+     * @returns {Actor[]} Liste der verfügbaren Schauspieler ohne bereits zugewiesene
+     */
     const getFilteredActors = () => {
         if (!film?.actors) return availableActors;
 
