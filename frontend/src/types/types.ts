@@ -9,6 +9,7 @@ export interface Film {
     replacement_cost: string,
     rating: string,
     special_features: string,
+    language_id: number,
     actors?: Actor[]
     //categories?: Category[];
 }
