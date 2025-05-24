@@ -85,7 +85,8 @@ const defaultValidation: ValidationFieldset = {
     },
     release_year: {
         validation: {
-            required: true
+            required: true,
+            pattern: /^(18(7\d|8\d|9\d)|19\d\d|20\d\d|2100)$/
         },
         message: "Jahr ist erforderlich",
         valid: true
