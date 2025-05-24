@@ -132,7 +132,8 @@ const FilmErstellen: React.FC = () => {
         <div>
             <Typography variant="h4" gutterBottom>Neuen Film erstellen</Typography>
             <Stack spacing={2}>
-                <TextField label="Titel" name="title" value={film.title} onChange={handleChange} error={!!errors.title} helperText={errors.title} fullWidth required />
+                <TextField
+                    label="Titel" name="title" value={film.title} onChange={handleChange} error={!!errors.title} helperText={errors.title} fullWidth required />
                 <TextField label="Beschreibung" name="description" value={film.description} onChange={handleChange} multiline rows={4} error={!!errors.description} helperText={errors.description} fullWidth />
                 <TextField label="Erscheinungsjahr" name="release_year" value={film.release_year} onChange={handleChange} error={!!errors.release_year} helperText={errors.release_year} fullWidth />
                 <TextField label="Ausleihdauer" name="rental_duration" value={film.rental_duration} onChange={handleChange} error={!!errors.rental_duration} helperText={errors.rental_duration} fullWidth />

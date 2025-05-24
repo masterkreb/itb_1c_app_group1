@@ -1,100 +1,48 @@
 // frontend/src/pages/ActorFormular.tsx
 
 import React, { useEffect, useState } from "react";
-import {Stack, TextField, Button, Typography,
-FormControl, InputLabel, Select, MenuItem, SelectChangeEvent } from "@mui/material";
-import JsonView from "@uiw/react-json-view";
 import { useParams, useNavigate } from "react-router-dom";
 import {
-    getActorById,
-    createActor,
-    updateActor
-} from "../service/ActorService";
-import { getAllFilms } from "../service/FilmService";  // ← neu
-import { Film } from "../types/types";                 // ← neu
-
-// Eingabe-Typ für das Formular
-export interface InputType {
-    id: string;
-    first_name: string;
-    last_name: string;
-}
-
-// Default-Werte für das Formular (Create-Modus)
-const defaultInput: InputType = {
-    id: "",
-    first_name: "",
-    last_name: ""
-};
-
-// Validation-Setup (unverändert)
-export type ValidationFieldset = {
-    [key in keyof Partial<InputType>]: {
-        validation?: {
-            required?: boolean;
-            minLength?: number;
-            maxLength?: number;
-            pattern?: RegExp;
-        };
-        message?: string;
-        valid: boolean;
-    };
-};
-
-const defaultValidation: ValidationFieldset = {
-    id: { validation: { required: false }, valid: true },
-    first_name: {
-        validation: {
-            required: true,
-            minLength: 1,
-            maxLength: 20,
-            pattern: /^[a-zA-Z0-9\s]+$/
-        },
-        valid: true
-    },
-    last_name: {
-        validation: {
-            required: true,
-            minLength: 1,
-            maxLength: 20,
-            pattern: /^[a-zA-Z0-9\s]+$/
-        },
-        valid: true
-    }
-};
+    TextField,
+    Button,
+    Stack,
+    Typography,
+    MenuItem,
+    FormControl,
+    InputLabel,
+    Select,
+    SelectChangeEvent,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogContentText,
+    DialogTitle
+} from "@mui/material";
+import { getActorById, createActor, updateActor, deleteActor } from "../service/ActorService";
+import { getAllFilms } from "../service/FilmService";
+import { Film } from "../types/types";
 
 const ActorFormular: React.FC = () => {
-    // ① Lese die ID aus der URL: wenn vorhanden, bist du im Edit-Modus
     const { id } = useParams<{ id: string }>();
-    // ② Hook zum Navigieren nach Save oder Cancel
     const navigate = useNavigate();
 
-    // Form- und Validation-State
-    const [input, setInput] = useState<InputType>(defaultInput);
-    const [validation, setValidation] = useState<ValidationFieldset>(defaultValidation);
-
-    // === NEU: State für Filme & Auswahl ===
+    const [input, setInput] = useState({ first_name: "", last_name: "" });
+    const [errors, setErrors] = useState<{ [key: string]: string }>({});
     const [allFilms, setAllFilms] = useState<Film[]>([]);
     const [selectedFilms, setSelectedFilms] = useState<number[]>([]);
+    const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+    const [deleteSuccessOpen, setDeleteSuccessOpen] = useState(false);
 
-    // ③ Beim ersten Render: lade Filme und ggf. bestehenden Actor
     useEffect(() => {
-        // Filme laden für Multi-Select
-        getAllFilms().then(films => {
-            if (films) setAllFilms(films);
-        });
+        getAllFilms().then(films => setAllFilms(films ?? []));
 
-        // Actor laden
         if (id) {
             getActorById(id).then(actor => {
                 if (actor) {
-                    // Input befüllen
                     setInput({
-                        id: actor.actor_id.toString(),
                         first_name: actor.first_name,
                         last_name: actor.last_name
                     });
-                    // falls actor.films mitkommt, initiale Auswahl setzen
                     if (actor.films) {
                         setSelectedFilms(actor.films.map(f => f.film_id!));
                     }
@@ -103,91 +51,39 @@ const ActorFormular: React.FC = () => {
         }
     }, [id]);
 
-    // Handler für alle TextField-Änderungen
-    function handleInputChanged(key: keyof InputType, value: unknown) {
-        setInput(prev => ({ ...prev, [key]: value as string }));
-    }
+    const validate = (): boolean => {
+        const errs: { [key: string]: string } = {};
+        if (!input.first_name || input.first_name.length < 1) {
+            errs.first_name = "Vorname ist erforderlich.";
+        }
+        if (!input.last_name || input.last_name.length < 1) {
+            errs.last_name = "Nachname ist erforderlich.";
+        }
+        setErrors(errs);
+        return Object.keys(errs).length === 0;
+    };
 
-    // Formular-Validation (bleibt unverändert)
-    function validateForm(): boolean {
-        let formIsValid = true;
-        Object.entries(input).forEach(([key, value]) => {
-            const field = key as keyof InputType;
-            const opts = validation[field];
-            if (opts?.validation) {
-                if (opts.validation.required && !value) {
-                    opts.valid = false;
-                    opts.message = "Bitte einen Wert angeben.";
-                    formIsValid = false;
-                } else if (
-                    opts.validation.minLength &&
-                    typeof value === "string" &&
-                    value.length < opts.validation.minLength
-                ) {
-                    opts.valid = false;
-                    opts.message = `Mindestens ${opts.validation.minLength} Zeichen.`;
-                    formIsValid = false;
-                } else if (
-                    opts.validation.maxLength &&
-                    typeof value === "string" &&
-                    value.length > opts.validation.maxLength
-                ) {
-                    opts.valid = false;
-                    opts.message = `Maximal ${opts.validation.maxLength} Zeichen.`;
-                    formIsValid = false;
-                } else if (
-                    opts.validation.pattern &&
-                    typeof value === "string" &&
-                    !opts.validation.pattern.test(value)
-                ) {
-                    opts.valid = false;
-                    opts.message = "Ungültiges Format.";
-                    formIsValid = false;
-                } else {
-                    opts.valid = true;
-                    opts.message = "";
-                }
-                setValidation(prev => ({
-                    ...prev,
-                    [field]: { ...opts }
-                }));
-            }
-        });
-        return formIsValid;
-    }
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const { name, value } = e.target;
+        setInput(prev => ({ ...prev, [name]: value }));
+    };
 
-    // Save-Handler: unterscheidet Create vs. Update, inkl. n:n-Verknüpfung
-    async function handleSaveClicked(): Promise<void> {
-        if (!validateForm()) return;
+    const handleSave = async () => {
+        if (!validate()) return;
 
         let actorId: number | undefined;
+
         if (id) {
-            // Update-Modus
-            const updated = await updateActor(id, {
-                first_name: input.first_name,
-                last_name: input.last_name
-            });
-            if (updated) actorId = Number(id);
-            else {
-                alert("Update fehlgeschlagen.");
-                return;
-            }
+            const updated = await updateActor(id, input);
+            if (!updated) return alert("Fehler beim Aktualisieren.");
+            actorId = +id;
         } else {
-            // Create-Modus
-            const newId = await createActor({
-                first_name: input.first_name,
-                last_name: input.last_name
-            });
-            if (newId) actorId = newId;
-            else {
-                alert("Erstellung fehlgeschlagen.");
-                return;
-            }
+            const newId = await createActor(input);
+            if (!newId) return alert("Fehler beim Erstellen.");
+            actorId = newId;
         }
 
-        // ==== NEU: n:n Actor↔Film aktualisieren ====
         if (actorId !== undefined) {
-            // alle alten Zuordnungen löschen
             await Promise.all(
                 allFilms.map(f =>
                     fetch(`http://localhost:3000/actor/${actorId}/film/${f.film_id}`, {
@@ -195,7 +91,6 @@ const ActorFormular: React.FC = () => {
                     })
                 )
             );
-            // nur ausgewählte Zuordnungen neu anlegen
             await Promise.all(
                 selectedFilms.map(fid =>
                     fetch(`http://localhost:3000/actor/${actorId}/film/${fid}`, {
@@ -205,35 +100,45 @@ const ActorFormular: React.FC = () => {
             );
         }
 
-        setValidation(defaultValidation);
         navigate("/actor");
-    }
+    };
+
+    const handleDelete = async () => {
+        setDeleteConfirmOpen(false);
+        if (id) {
+            const success = await deleteActor(id);
+            if (success) {
+                setDeleteSuccessOpen(true);
+                setTimeout(() => navigate("/actor"), 2000);
+            }
+        }
+    };
 
     return (
         <div>
-            {/* Überschrift je nach Modus */}
-            <Typography variant="h5" gutterBottom>
-                {id ? `Actor bearbeiten (ID ${id})` : "Neuen Actor anlegen"}
+            <Typography variant="h4" gutterBottom>
+                {id ? "Schauspieler bearbeiten" : "Neuen Schauspieler anlegen"}
             </Typography>
-
-            <Stack spacing={2} maxWidth={400}>
-                {/* Vorname */}
+            <Stack spacing={2}>
                 <TextField
                     label="Vorname"
-                    variant="standard"
+                    name="first_name"
                     value={input.first_name}
-                    onChange={e => handleInputChanged("first_name", e.target.value)}
+                    onChange={handleChange}
+                    error={Boolean(errors.first_name)}
+                    helperText={errors.first_name}
+                    fullWidth
                 />
-                {/* Nachname */}
                 <TextField
                     label="Nachname"
-                    variant="standard"
+                    name="last_name"
                     value={input.last_name}
-                    onChange={e => handleInputChanged("last_name", e.target.value)}
+                    onChange={handleChange}
+                    error={Boolean(errors.last_name)}
+                    helperText={errors.last_name}
+                    fullWidth
                 />
-
-                {/* === NEU: Multi-Select Filme === */}
-                <FormControl variant="standard" fullWidth>
+                <FormControl fullWidth>
                     <InputLabel id="film-multi-label">Filme</InputLabel>
                     <Select
                         labelId="film-multi-label"
@@ -242,48 +147,66 @@ const ActorFormular: React.FC = () => {
                         onChange={(e: SelectChangeEvent<number[]>) =>
                             setSelectedFilms(e.target.value as number[])
                         }
-                        renderValue={vals =>
+                        renderValue={(selected) =>
                             allFilms
-                                .filter(f => vals.includes(f.film_id!))
+                                .filter(f => selected.includes(f.film_id!))
                                 .map(f => f.title)
                                 .join(", ")
                         }
                     >
-                        {allFilms.map(f => (
-                            <MenuItem key={f.film_id} value={f.film_id!}>
-                                {f.title}
+                        {allFilms.map((film) => (
+                            <MenuItem key={film.film_id} value={film.film_id!}>
+                                {film.title}
                             </MenuItem>
                         ))}
                     </Select>
                 </FormControl>
 
-                {/* Save- & Cancel-Buttons */}
-                <Stack direction="row" spacing={2} pt={2}>
-                    <Button variant="contained" onClick={handleSaveClicked}>
-                        Save
+                <Stack direction="row" spacing={2}>
+                    <Button variant="contained" color="primary" onClick={handleSave}>
+                        Speichern
                     </Button>
-                    <Button variant="outlined" onClick={() => navigate("/actor")}>
-                        Cancel
+                    <Button variant="outlined" color="secondary" onClick={() => navigate("/actor")}>
+                        Zurück
                     </Button>
+                    {id && (
+                        <Button variant="contained" color="error" onClick={() => setDeleteConfirmOpen(true)}>
+                            Löschen
+                        </Button>
+                    )}
                 </Stack>
             </Stack>
 
-            {/* Debug-Ausgabe: Input & Validation */}
-            <Typography variant="subtitle2" pt={4}>
-                Debug: Input
-            </Typography>
-            <JsonView value={input} collapsed />
+            {/* Lösch-Dialog */}
+            <Dialog open={deleteConfirmOpen} onClose={() => setDeleteConfirmOpen(false)}>
+                <DialogTitle>Löschen bestätigen</DialogTitle>
+                <DialogContent>
+                    <DialogContentText>
+                        Möchten Sie diesen Schauspieler wirklich löschen?
+                    </DialogContentText>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={() => setDeleteConfirmOpen(false)} color="secondary">
+                        Abbrechen
+                    </Button>
+                    <Button onClick={handleDelete} color="error">
+                        Löschen
+                    </Button>
+                </DialogActions>
+            </Dialog>
 
-            <Typography variant="subtitle2" pt={2}>
-                Debug: Validation
-            </Typography>
-            <JsonView value={validation} collapsed />
-
-            {/* Debug-Ausgabe: Selected Films */}
-            <Typography variant="subtitle2" pt={2}>
-                Debug: Ausgewählte Filme
-            </Typography>
-            <JsonView value={selectedFilms} collapsed />
+            {/* Erfolg nach Löschen */}
+            <Dialog open={deleteSuccessOpen} onClose={() => setDeleteSuccessOpen(false)}>
+                <DialogTitle>Schauspieler gelöscht</DialogTitle>
+                <DialogContent>
+                    <DialogContentText>Der Schauspieler wurde erfolgreich gelöscht.</DialogContentText>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={() => navigate("/actor")} color="primary">
+                        Zurück zur Übersicht
+                    </Button>
+                </DialogActions>
+            </Dialog>
         </div>
     );
 };

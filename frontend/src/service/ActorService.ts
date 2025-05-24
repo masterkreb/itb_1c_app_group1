@@ -126,3 +126,51 @@ export async function deleteActor(id: string): Promise<boolean> {
     console.log("Successfully deleteActor", result);
     return result;
 }
+/**
+ * Fügt einem Schauspieler einen Film hinzu.
+ * @param actorId ID des Schauspielers
+ * @param filmId ID des Films
+ * @returns true bei Erfolg, false bei Fehler
+ */
+export async function addFilmToActor(actorId: number, filmId: number): Promise<boolean> {
+    console.log(`Start addFilmToActor: actorId=${actorId}, filmId=${filmId}`);
+
+    const response = await fetch(`${baseUrl}/${actorId}/film/${filmId}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+    });
+
+    if (!response.ok) {
+        console.error(`Error while adding film ${filmId} to actor ${actorId}:`, response.status);
+        return false;
+    }
+
+    const result = await response.json();
+    console.log('Successfully addFilmToActor', result);
+    return true;
+}
+
+/**
+ * Entfernt einen Film von einem Schauspieler.
+ * @param actorId ID des Schauspielers
+ * @param filmId ID des Films
+ * @returns true bei Erfolg, false bei Fehler
+ */
+export async function removeFilmFromActor(actorId: number, filmId: number): Promise<boolean> {
+    console.log(`Start removeFilmFromActor: actorId=${actorId}, filmId=${filmId}`);
+
+    const response = await fetch(`${baseUrl}/${actorId}/film/${filmId}`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' }
+    });
+
+    if (!response.ok) {
+        console.error(`Error while removing film ${filmId} from actor ${actorId}:`, response.status);
+        return false;
+    }
+
+    const result = await response.json();
+    console.log('Successfully removeFilmFromActor', result);
+    return true;
+}
+
