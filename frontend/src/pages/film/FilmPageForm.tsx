@@ -85,7 +85,7 @@ const defaultValidation: ValidationFieldset = {
     },
     release_year: {
         validation: {
-            required: false
+            required: true
         },
         message: "Jahr ist erforderlich",
         valid: true
@@ -393,7 +393,7 @@ const FilmPageForm = () => {
                             rows={3}
                         />
                         <TextField
-                            label="Jahr"
+                            label="Jahr *"
                             type="number"
                             value={input.release_year}
                             onChange={(e) => handleInputChanged("release_year", e.target.value)}
