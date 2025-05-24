@@ -3,9 +3,9 @@ import { getAllFilms } from "../services/FilmService";
 import { Film } from "../types/types";
 import {
     Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper,
-    Button, Stack, Typography, CircularProgress, IconButton, Tooltip
+    Button, Stack, Typography, CircularProgress, IconButton, Tooltip, Alert, Snackbar
 } from "@mui/material";
-import { NavLink, useNavigate } from "react-router";
+import { NavLink, useNavigate, useLocation } from "react-router";
 import RefreshIcon from "@mui/icons-material/Refresh";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import EditIcon from "@mui/icons-material/Edit";
@@ -20,11 +20,20 @@ const FilmPage: React.FC = () => {
     const [films, setFilms] = useState<Film[]>([]);
     const [error, setError] = useState<string | null>(null);
     const [loading, setLoading] = useState<boolean>(true);
+    const [feedback, setFeedback] = useState<{message: string, type: 'success' | 'error'} | null>(null);
     const navigate = useNavigate();
+    const location = useLocation();
 
     useEffect(() => {
         loadFilms();
-    }, []);
+        
+        // Feedback-Nachricht aus Location State
+        if (location.state?.feedback) {
+            setFeedback(location.state.feedback);
+            // State zurücksetzen, damit die Nachricht beim Refresh nicht wieder angezeigt wird
+            navigate(location.pathname, { replace: true, state: {} });
+        }
+    }, [location]);
 
     /**
      * Holt alle Filme aus dem Backend.
@@ -42,6 +51,10 @@ const FilmPage: React.FC = () => {
             setLoading(false);
         }
     }
+
+    const handleCloseFeedback = () => {
+        setFeedback(null);
+    };
 
     return (
         <div>
@@ -62,6 +75,22 @@ const FilmPage: React.FC = () => {
                     Neuen Film anlegen
                 </Button>
             </Stack>
+
+            {/* Feedback-Nachricht */}
+            <Snackbar 
+                open={feedback !== null} 
+                autoHideDuration={6000} 
+                onClose={handleCloseFeedback}
+                anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+            >
+                <Alert 
+                    onClose={handleCloseFeedback} 
+                    severity={feedback?.type || 'info'} 
+                    variant="filled"
+                >
+                    {feedback?.message}
+                </Alert>
+            </Snackbar>
 
             <TableContainer component={Paper}>
                 <Table>

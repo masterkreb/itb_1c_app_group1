@@ -108,16 +108,21 @@ export async function updateFilm(id: number, film: Film) {
 export async function deleteFilm(id: number) {
     console.log("Start DeleteFilm", id)
 
-    const response = await fetch(`${baseUrl}/${id}`, {
-        method: "DELETE",
-        headers: {
-            "Content-Type": "application/json"
-        },
-    });
-    console.log("Got response from server: ", response);
-    if (!response.ok) {
-        console.error("Error while deleting film: ", response.status);
-        throw new Error(`Fehler beim Löschen des Films: ${response.statusText}`);
+    try {
+        const response = await fetch(`${baseUrl}/${id}`, {
+            method: "DELETE",
+            headers: {
+                "Content-Type": "application/json"
+            },
+        });
+        console.log("Got response from server: ", response);
+        if (!response.ok) {
+            console.error("Error while deleting film: ", response.status);
+            throw new Error(`Fehler beim Löschen des Films: ${response.statusText}`);
+        }
+    } catch (error) {
+        console.error("Error while deleting film:", error);
+        throw error;
     }
 }
 
@@ -125,22 +130,27 @@ export async function deleteFilm(id: number) {
  * Fügt einen Schauspieler zu einem Film hinzu.
  *
  * @param {number} filmId - Die ID des Films
- * @param {number} actorId - Die ID des Schauspielers, der hinzugefügt werden soll
+ * @param {number} actorId - Die ID des hinzuzufügenden Schauspielers
  * @returns {Promise<void>}
  */
 export async function addActorToFilm(filmId: number, actorId: number) {
-    console.log("Start AddActorToFilm", filmId, actorId)
+    console.log("Start addActorToFilm", filmId, actorId);
 
-    const response = await fetch(`${baseUrl}/${filmId}/actor/${actorId}`, {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-    });
-    console.log("Got response from server: ", response);
-    if (!response.ok) {
-        console.error("Error while adding actor to film: ", response.status);
-        throw new Error(`Fehler beim Hinzufügen des Schauspielers zum Film: ${response.statusText}`);
+    try {
+        const response = await fetch(`${baseUrl}/${filmId}/actor/${actorId}`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            }
+        });
+        console.log("Got response from server: ", response);
+        if (!response.ok) {
+            console.error("Error while adding actor to film: ", response.status);
+            throw new Error(`Fehler beim Hinzufügen des Schauspielers zum Film: ${response.statusText}`);
+        }
+    } catch (error) {
+        console.error("Error while adding actor to film:", error);
+        throw error;
     }
 }
 
@@ -148,21 +158,27 @@ export async function addActorToFilm(filmId: number, actorId: number) {
  * Entfernt einen Schauspieler von einem Film.
  *
  * @param {number} filmId - Die ID des Films
- * @param {number} actorId - Die ID des Schauspielers, der entfernt werden soll
+ * @param {number} actorId - Die ID des zu entfernenden Schauspielers
  * @returns {Promise<void>}
  */
 export async function removeActorFromFilm(filmId: number, actorId: number) {
-    console.log("Start RemoveActorFromFilm", filmId, actorId)
+    console.log("Start removeActorFromFilm", filmId, actorId);
 
-    const response = await fetch(`${baseUrl}/${filmId}/actor/${actorId}`, {
-        method: "DELETE",
-        headers: {
-            "Content-Type": "application/json"
-        },
-    });
-    console.log("Got response from server: ", response);
-    if (!response.ok) {
-        console.error("Error while removing actor from film: ", response.status);
-        throw new Error(`Fehler beim Entfernen des Schauspielers vom Film: ${response.statusText}`);
+    try {
+        const response = await fetch(`${baseUrl}/${filmId}/actor/${actorId}`, {
+            method: "DELETE",
+            headers: {
+                "Content-Type": "application/json"
+            }
+        });
+        console.log("Got response from server: ", response);
+        if (!response.ok) {
+            console.error("Error while removing actor from film: ", response.status);
+            throw new Error(`Fehler beim Entfernen des Schauspielers vom Film: ${response.statusText}`);
+        }
+    } catch (error) {
+        console.error("Error while removing actor from film:", error);
+        throw error;
     }
 }
+

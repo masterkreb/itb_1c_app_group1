@@ -3,6 +3,7 @@ export interface Film {
     title: string,
     description: string,
     release_year: number,
+    language_id: number,
     rental_duration: number,
     rental_rate: number,
     length: number,

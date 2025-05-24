@@ -7,7 +7,7 @@ import { getAllActors } from "../services/ActorService";
 import {
     Button, Paper, Typography, Box, List, ListItem, ListItemText, ListItemSecondaryAction,
     IconButton, Divider, MenuItem, Select, FormControl, InputLabel, SelectChangeEvent,
-    CircularProgress
+    CircularProgress, Dialog, DialogTitle, DialogContent, DialogActions, Alert
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 
@@ -24,6 +24,8 @@ const FilmDetailPage = () => {
     const [selectedActorId, setSelectedActorId] = useState<number>(0);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
+    const [deleteDialogOpen, setDeleteDialogOpen] = useState<boolean>(false);
+    const [deleteError, setDeleteError] = useState<string | null>(null);
     const navigate = useNavigate();
 
     /**
@@ -78,17 +80,34 @@ const FilmDetailPage = () => {
     };
 
     /**
+     * Öffnet den Bestätigungsdialog zum Löschen
+     */
+    const openDeleteDialog = () => {
+        setDeleteDialogOpen(true);
+        setDeleteError(null);
+    };
+
+    /**
+     * Schließt den Bestätigungsdialog zum Löschen
+     */
+    const closeDeleteDialog = () => {
+        setDeleteDialogOpen(false);
+    };
+
+    /**
      * Löscht den aktuellen Film und navigiert zurück zur Übersicht
      */
     const handleDelete = async () => {
         if (id) {
             setLoading(true);
+            setDeleteError(null);
             try {
                 await deleteFilm(Number(id));
+                closeDeleteDialog();
                 navigate("/film");
             } catch (err: any) {
                 console.error("Fehler beim Löschen des Films:", err);
-                setError(`Fehler beim Löschen: ${err.message || "Unbekannter Fehler"}`);
+                setDeleteError(err.message || "Unbekannter Fehler beim Löschen");
                 setLoading(false);
             }
         }
@@ -245,7 +264,7 @@ const FilmDetailPage = () => {
                         <Button
                             variant="contained"
                             color="error"
-                            onClick={handleDelete}
+                            onClick={openDeleteDialog}
                         >
                             Löschen
                         </Button>
@@ -260,6 +279,41 @@ const FilmDetailPage = () => {
             ) : (
                 <Typography>Film nicht gefunden</Typography>
             )}
+
+            {/* Lösch-Bestätigungsdialog */}
+            <Dialog
+                open={deleteDialogOpen}
+                onClose={closeDeleteDialog}
+            >
+                <DialogTitle>Film löschen</DialogTitle>
+                <DialogContent>
+                    <Typography>
+                        Sind Sie sicher, dass Sie den Film "{film?.title}" löschen möchten?
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                        Dies kann nicht rückgängig gemacht werden. Alle Verknüpfungen zu diesem Film werden ebenfalls gelöscht.
+                    </Typography>
+                    
+                    {deleteError && (
+                        <Alert severity="error" sx={{ mt: 2 }}>
+                            {deleteError}
+                        </Alert>
+                    )}
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={closeDeleteDialog} color="primary">
+                        Abbrechen
+                    </Button>
+                    <Button 
+                        onClick={handleDelete} 
+                        color="error" 
+                        variant="contained"
+                        disabled={loading}
+                    >
+                        {loading ? "Wird gelöscht..." : "Löschen"}
+                    </Button>
+                </DialogActions>
+            </Dialog>
         </Paper>
     );
 };

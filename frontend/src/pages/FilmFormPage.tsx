@@ -9,6 +9,7 @@ const defaultFilm: Film = {
     title: "",
     description: "",
     release_year: new Date().getFullYear(),
+    language_id: 1, // Standardmäßig Englisch (ID 1)
     rental_duration: 3,
     rental_rate: 4.99,
     length: 120,
@@ -130,6 +131,15 @@ const FilmFormPage = () => {
                     name="release_year"
                     type="number"
                     value={film.release_year}
+                    onChange={handleChange}
+                    required
+                    fullWidth
+                />
+                <TextField
+                    label="Sprache ID"
+                    name="language_id"
+                    type="number"
+                    value={film.language_id}
                     onChange={handleChange}
                     required
                     fullWidth
