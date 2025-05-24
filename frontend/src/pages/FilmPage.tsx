@@ -47,6 +47,13 @@ const FilmPage = () => {
     const [rentalDuration, setRentalDuration] = useState<string>("")
     const [isLoading, setIsLoading] = useState<boolean>(false)
     const [searchTerm, setSearchTerm] = useState<string>("")
+    const [formData, setFormData] = useState({
+        title: '',
+        description: '',
+        rental_rate: 0,
+        rental_duration: 0
+    });
+    const [error, setError] = useState<string | null>(null);
 
     // Films laden
     useEffect(() => {
@@ -82,6 +89,9 @@ const FilmPage = () => {
         try {
             // Cargar los detalles completos del film incluyendo actors
             console.log("Cargando detalles del film:", film.film_id)
+            if (!film.film_id) {
+                throw new Error("Film ID ist nicht definiert")
+            }
             const fullFilmData = await getFilmById(film.film_id)
             console.log("Datos completos del film:", fullFilmData)
             setSelectedFilm(fullFilmData)
@@ -103,12 +113,15 @@ const FilmPage = () => {
         setShowEditDialog(true)
     }
 
+    // Ändern Sie die handleAdd Funktion:
     const handleAdd = () => {
-        setTitle("")
-        setDescription("")
-        setRentalRate("")
-        setRentalDuration("")
-        setShowAddDialog(true)
+        setFormData({
+            title: '',
+            description: '',
+            rental_rate: 0,
+            rental_duration: 0
+        });
+        setShowAddDialog(true);
     }
 
     const handleAddActor = (film: Film) => {
@@ -121,6 +134,7 @@ const FilmPage = () => {
         if (!selectedFilm) return
 
         try {
+            if (!selectedFilm.film_id) return;
             await updateFilm(selectedFilm.film_id, {
                 title,
                 description,
@@ -136,25 +150,42 @@ const FilmPage = () => {
 
     const handleCreate = async () => {
         try {
-            await createFilm({
-                title,
-                description,
-                rental_rate: Number.parseFloat(rentalRate),
-                rental_duration: Number.parseInt(rentalDuration),
-            })
-            setShowAddDialog(false)
-            loadFilms()
-        } catch (error) {
-            console.error("Fehler beim Erstellen:", error)
+            // Minimales Film-Objekt mit nur den notwendigsten Feldern
+            const filmToCreate = {
+                title: formData.title.trim(),
+                description: formData.description.trim(),
+                rental_rate: Number(formData.rental_rate),
+                rental_duration: Number(formData.rental_duration),
+                language_id: 1,  // Pflichtfeld für die Sakila-DB
+                release_year: new Date().getFullYear()
+            };
+
+            console.log('Sende Film-Daten:', filmToCreate);
+            const result = await createFilm(filmToCreate);
+            
+            if (result) {
+                setShowAddDialog(false);
+                setFormData({
+                    title: '',
+                    description: '',
+                    rental_rate: 0,
+                    rental_duration: 0
+                });
+                await loadFilms();
+            }
+        } catch (err) {
+            console.error('Fehler beim Erstellen des Films:', err);
+            setError(err instanceof Error ? err.message : 'Ein unerwarteter Fehler ist aufgetreten');
         }
-    }
+    };
 
     const handleDelete = async (film: Film) => {
         if (confirm(`Film "${film.title}" wirklich löschen?`)) {
             try {
+                if (!film.film_id) return;
                 const success = await deleteFilm(film.film_id)
                 if (success) {
-                    loadFilms()
+                    await loadFilms()
                 }
             } catch (error) {
                 console.error("Fehler beim Löschen:", error)
@@ -172,6 +203,7 @@ const FilmPage = () => {
         }
 
         try {
+            if (!selectedFilm.film_id) return;
             const success = await addActorToFilm(selectedFilm.film_id, actor.actor_id)
             if (success) {
                 loadFilms()
@@ -196,6 +228,7 @@ const FilmPage = () => {
         }
 
         try {
+            if (!selectedFilm.film_id) return;
             const success = await removeActorFromFilm(selectedFilm.film_id, actor.actor_id)
             if (success) {
                 loadFilms()
@@ -388,11 +421,17 @@ const FilmPage = () => {
                 <DialogTitle>Neuen Film hinzufügen</DialogTitle>
                 <DialogContent>
                     <Stack spacing={3} sx={{ mt: 2 }}>
-                        <TextField label="Titel" value={title} onChange={(e) => setTitle(e.target.value)} fullWidth required />
+                        <TextField 
+                            label="Titel" 
+                            value={formData.title} 
+                            onChange={(e) => setFormData({...formData, title: e.target.value})} 
+                            fullWidth 
+                            required 
+                        />
                         <TextField
                             label="Beschreibung"
-                            value={description}
-                            onChange={(e) => setDescription(e.target.value)}
+                            value={formData.description}
+                            onChange={(e) => setFormData({...formData, description: e.target.value})}
                             fullWidth
                             multiline
                             rows={3}
@@ -400,8 +439,8 @@ const FilmPage = () => {
                         />
                         <TextField
                             label="Preis"
-                            value={rentalRate}
-                            onChange={(e) => setRentalRate(e.target.value)}
+                            value={formData.rental_rate}
+                            onChange={(e) => setFormData({...formData, rental_rate: Number(e.target.value)})}
                             fullWidth
                             type="number"
                             step="0.01"
@@ -409,17 +448,17 @@ const FilmPage = () => {
                         />
                         <TextField
                             label="Dauer (Tage)"
-                            value={rentalDuration}
-                            onChange={(e) => setRentalDuration(e.target.value)}
+                            value={formData.rental_duration}
+                            onChange={(e) => setFormData({...formData, rental_duration: Number(e.target.value)})}
                             fullWidth
                             type="number"
                             required
                         />
                         <Stack direction="row" spacing={2} justifyContent="center">
-                            <Button
-                                variant="contained"
-                                onClick={handleCreate}
-                                disabled={!title || !description || !rentalRate || !rentalDuration}
+                            <Button 
+                                variant="contained" 
+                                onClick={handleCreate} 
+                                disabled={!formData.title || formData.rental_rate <= 0 || formData.rental_duration <= 0}
                             >
                                 Erstellen
                             </Button>

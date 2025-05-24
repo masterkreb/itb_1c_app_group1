@@ -60,32 +60,22 @@ export async function getFilmById(id: number): Promise<Film> {
     return result.data
 }
 
-/**
- * Erstellt einen neuen Film
- * @param {Omit<Film, 'film_id'>} film - Film-Daten ohne ID
- * @returns {Promise<Film>} Promise mit dem erstellten Film
- * @throws {Error} Wenn das Erstellen fehlschlägt
- * @example
- * const newFilm = await createFilm({ title: "New Movie", description: "Great film", rental_rate: 4.99, rental_duration: 7 });
- */
-export async function createFilm(film: Omit<Film, "film_id">): Promise<Film> {
-    console.log("Start CreateFilm")
-    const response = await fetch(baseUrl, {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-        },
-        body: JSON.stringify(film),
-    })
 
-    console.log("Got response from server: ", response)
+
+export async function createFilm(filmData: Partial<Film>) {
+    const response = await fetch(`${baseUrl}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(filmData)
+    });
 
     if (!response.ok) {
-        throw new Error(`Fehler beim Erstellen des Films: ${response.status}`)
+        throw new Error(`Fehler beim Erstellen des Films: ${response.status}`);
     }
 
-    const result = await response.json()
-    return result.data
+    return response.json();
 }
 
 /**
