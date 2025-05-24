@@ -465,7 +465,7 @@ const FilmPageForm = () => {
                         />
 
                         <FormControl fullWidth error={!validation.language_id?.valid}>
-                            <InputLabel id="language-label">Sprache</InputLabel>
+                            <InputLabel id="language-label">Sprache *</InputLabel>
                             <Select
                                 labelId="language-label"
                                 value={input.language_id}
