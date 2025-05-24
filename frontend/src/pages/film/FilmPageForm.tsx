@@ -225,9 +225,12 @@ const FilmPageForm = () => {
         field: "first_name" | "last_name",
         value: string
     ): void {
+        const regex = /^[A-Za-zÄÖÜäöüßÉÈÊËéèêëÀÂàâÇçÑñ\-'\s]+$/;
+        if (!regex.test(value)) return;
         const updated = [...newActorInputs];
         updated[index][field] = value;
         setNewActorInputs(updated);
+
     }
 
     /**
