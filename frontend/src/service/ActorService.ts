@@ -37,14 +37,16 @@ export async function getAllActors(): Promise<Actor[] | undefined> {
  */
 export async function getActorById(id: string): Promise<Actor | null> {
     try {
-        const response = await fetch(`/api/actor/${id}`);
+        const response = await fetch(`${baseUrl}/${id}`, {
+            method: 'GET',
+            headers: { 'Content-Type': 'application/json' }
+        });
         if (!response.ok) {
             console.error('Fehler beim Laden des Schauspielers:', response.statusText);
             return null;
         }
-
-        const data = await response.json();
-        return data;
+        const payload = (await response.json()) as ApiResponse<Actor>;
+        return payload.data;
     } catch (error) {
         console.error('Fehler beim Laden des Schauspielers:', error);
         return null;

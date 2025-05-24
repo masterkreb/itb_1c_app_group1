@@ -23,17 +23,22 @@ import {
 } from '@mui/material';
 
 const FilmPage: React.FC = () => {
+    // State für alle Filme vom Server
     const [films, setFilms] = useState<Film[]>([]);
+    // State für den Suchbegriff
     const [searchTerm, setSearchTerm] = useState<string>('');
+    // State für die aktuelle Seite
     const [page, setPage] = useState(0);
+    // Anzahl der Zeilen pro Seite
     const rowsPerPage = 10;
 
-    // Dialog State
+    // Dialog-State für die Löschbestätigung
     const [openDialog, setOpenDialog] = useState(false);
     const [selectedFilmId, setSelectedFilmId] = useState<number | null>(null);
 
-    const loadFilms = async (filter?: string) => {
-        const data = await getAllFilms(filter);
+    // Lädt Filme vom Backend (optional gefiltert)
+    const loadFilms = async () => {
+        const data = await getAllFilms();
         if (data) {
             setFilms(data);
         }
@@ -43,17 +48,21 @@ const FilmPage: React.FC = () => {
         loadFilms();
     }, []);
 
+    // Bestätigungsdialog öffnen
     const confirmDelete = (id: number) => {
         setSelectedFilmId(id);
         setOpenDialog(true);
     };
 
+    // Löschvorgang bestätigen
     const handleConfirmDelete = async () => {
         if (!selectedFilmId) return;
 
         const success = await deleteFilm(selectedFilmId.toString());
         if (success) {
-            loadFilms(searchTerm);
+            // Nach dem Löschen erneut laden und Seite zurücksetzen
+            setPage(0);
+            loadFilms();
         } else {
             alert('Löschen fehlgeschlagen');
         }
@@ -61,9 +70,15 @@ const FilmPage: React.FC = () => {
         setSelectedFilmId(null);
     };
 
+    // Seitenwechsel in der Pagination
     const handleChangePage = (_: unknown, newPage: number) => {
         setPage(newPage);
     };
+
+    // Client-seitige Filterung nach Titel (case-insensitive)
+    const filteredFilms = films.filter(film =>
+        film.title.toLowerCase().includes(searchTerm.toLowerCase())
+    );
 
     return (
         <div>
@@ -71,22 +86,24 @@ const FilmPage: React.FC = () => {
                 Filme
             </Typography>
 
+            {/* Suchfeld und Buttons */}
             <Stack direction="row" spacing={2} alignItems="center" mb={2}>
                 <TextField
-                    label="Search by title"
+                    label="Suche nach Titel"
                     variant="outlined"
                     size="small"
                     value={searchTerm}
                     onChange={e => setSearchTerm(e.target.value)}
                 />
-                <Button variant="contained" onClick={() => loadFilms(searchTerm)}>
+                {/* Setzt Seite zurück, damit immer von vorne gesucht wird */}
+                <Button variant="contained" onClick={() => setPage(0)}>
                     Search
                 </Button>
                 <Button
                     variant="outlined"
                     onClick={() => {
                         setSearchTerm('');
-                        loadFilms();
+                        setPage(0);
                     }}
                 >
                     Clear
@@ -113,8 +130,9 @@ const FilmPage: React.FC = () => {
                             </TableRow>
                         </TableHead>
                         <TableBody>
-                            {films.length > 0 ? (
-                                films
+                            {filteredFilms.length > 0 ? (
+                                // Pagination auf gefilterten Daten
+                                filteredFilms
                                     .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                                     .map(film => (
                                         <TableRow key={film.film_id}>
@@ -164,9 +182,10 @@ const FilmPage: React.FC = () => {
                     </Table>
                 </TableContainer>
 
+                {/* Pagination an gefilterter Länge ausrichten */}
                 <TablePagination
                     component="div"
-                    count={films.length}
+                    count={filteredFilms.length}
                     page={page}
                     onPageChange={handleChangePage}
                     rowsPerPage={rowsPerPage}
@@ -174,7 +193,7 @@ const FilmPage: React.FC = () => {
                 />
             </Paper>
 
-            {/* MUI Bestätigungsdialog */}
+            {/* Bestätigungsdialog */}
             <Dialog
                 open={openDialog}
                 onClose={() => setOpenDialog(false)}

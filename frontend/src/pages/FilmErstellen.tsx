@@ -1,20 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { createFilm } from '../service/FilmService';
-import { getAllActors } from '../service/ActorService';
-import { Film, Actor, FilmRating } from '../types/types';
+
+import { Film,FilmRating } from '../types/types';
 import {
     Button,
     Stack,
     TextField,
     MenuItem,
-    Typography,
-    Select,
-    InputLabel,
-    FormControl,
-    OutlinedInput,
-    Checkbox,
-    ListItemText
+    Typography
 } from '@mui/material';
 
 const FilmErstellen: React.FC = () => {
@@ -33,15 +27,10 @@ const FilmErstellen: React.FC = () => {
         actors: [] // ✅ sicher initialisiert
     });
 
-    const [availableActors, setAvailableActors] = useState<Actor[]>([]);
+
     const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
     useEffect(() => {
-        async function fetchActors() {
-            const actors = await getAllActors();
-            setAvailableActors(actors || []);
-        }
-        fetchActors();
     }, []);
 
     const validateField = (name: string, value: any): string => {
@@ -91,16 +80,6 @@ const FilmErstellen: React.FC = () => {
         setErrors({ ...errors, [name]: validateField(name, value) });
     };
 
-    const handleActorSelectChange = (event: any) => {
-        const {
-            target: { value }
-        } = event;
-        const selectedActorIds = value as number[];
-        setFilm({
-            ...film,
-            actors: selectedActorIds.map(id => ({ actor_id: id, first_name: '', last_name: '' }))
-        });
-    };
 
     const handleSave = async () => {
         if (!validateAll()) {
@@ -115,7 +94,7 @@ const FilmErstellen: React.FC = () => {
             rental_rate: parseFloat(film.rental_rate),
             replacement_cost: parseFloat(film.replacement_cost),
             length: Number(film.length),
-            actor_ids: film.actors?.map(actor => actor.actor_id)
+
         };
 
         try {
@@ -146,32 +125,6 @@ const FilmErstellen: React.FC = () => {
                     ))}
                 </TextField>
                 <TextField label="Besondere Features" name="special_features" value={film.special_features} onChange={handleChange} error={!!errors.special_features} helperText={errors.special_features} fullWidth />
-
-                <FormControl fullWidth>
-                    <InputLabel id="actor-select-label">Schauspieler</InputLabel>
-                    <Select
-                        labelId="actor-select-label"
-                        multiple
-                        value={film.actors?.map(a => a.actor_id) || []}
-                        onChange={handleActorSelectChange}
-                        input={<OutlinedInput label="Schauspieler" />}
-                        renderValue={(selected) =>
-                            (selected as number[])
-                                .map(id => {
-                                    const actor = availableActors.find(a => a.actor_id === id);
-                                    return actor ? `${actor.first_name} ${actor.last_name}` : id;
-                                })
-                                .join(', ')
-                        }
-                    >
-                        {availableActors.map((actor) => (
-                            <MenuItem key={actor.actor_id} value={actor.actor_id}>
-                                <Checkbox checked={film.actors?.some(a => a.actor_id === actor.actor_id)} />
-                                <ListItemText primary={`${actor.first_name} ${actor.last_name}`} />
-                            </MenuItem>
-                        ))}
-                    </Select>
-                </FormControl>
 
                 <Stack direction="row" spacing={2}>
                     <Button variant="contained" color="primary" onClick={handleSave}>Erstellen</Button>
