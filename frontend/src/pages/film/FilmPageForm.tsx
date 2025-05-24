@@ -85,7 +85,8 @@ const defaultValidation: ValidationFieldset = {
     },
     release_year: {
         validation: {
-            required: true
+            required: true,
+            pattern: /^\d{4}$/
         },
         message: "Jahr ist erforderlich",
         valid: true
@@ -94,7 +95,7 @@ const defaultValidation: ValidationFieldset = {
         validation: {
             required: true,
             minLength: 1,
-            maxLength: 5,
+            maxLength: 3,
             pattern: /^\d+$/
         },
         message: "Länge ist erforderlich und muss eine Zahl sein.",
@@ -338,7 +339,7 @@ const FilmPageForm = () => {
         );
 
         delete sanitizedInput.film_id;
-        console.log("GÖNDERİLEN VERİ:", sanitizedInput);
+        console.log("Gehende Datei**********:", sanitizedInput);
 
         const success = id
             ? await updateFilm(id, sanitizedInput)
