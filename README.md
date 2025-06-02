@@ -7,7 +7,7 @@ Zu Beginn stellte unser Lehrer eine Projektvorlage bereit, auf deren Basis wir d
 
 ## 🔧 Technologien
 
-- **Frontend**: JavaScript, TypeScript
+- **Frontend**: JavaScript, TypeScript, [MUI (Material UI)](https://mui.com)
 - **Backend**: Node.js, Express
 - **Versionierung**: Git, GitHub
 - **Editor**: WebStorm
