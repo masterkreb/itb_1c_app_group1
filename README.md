@@ -1,22 +1,21 @@
-# ITB1c Group 1 – Fullstack Web Application
+# ITB1c Group 1 – Web Application
 
-Dies ist eine Fullstack-Webapplikation, die im Rahmen des Unterrichtsmoduls ITB1c in der Gruppe 1 entwickelt wurde.  
+Dies ist eine Webapplikation, die im Rahmen des Unterrichtsmoduls ITB1c in der Gruppe 1 entwickelt wurde.  
 Sie wurde mit **JavaScript** und **TypeScript** umgesetzt - sowohl im Frontend als auch im Backend.
 
 Zu Beginn stellte unser Lehrer eine Projektvorlage bereit, auf deren Basis wir das Projekt **weiterentwickelten und erweiterten**.
 
 ## 🔧 Technologien
 
-- **Frontend**: JavaScript, TypeScript, HTML, CSS
+- **Frontend**: JavaScript, TypeScript
 - **Backend**: Node.js, Express
 - **Versionierung**: Git, GitHub
 - **Editor**: WebStorm
 
 ## 📁 Projektstruktur
 
-- `frontend/` – Benutzeroberfläche mit React / HTML
+- `frontend/` – Benutzeroberfläche mit React
 - `backend/` – Serverlogik (API-Endpunkte)
-- `shared/` – Gemeinsame Modelle oder Typen
 
 ## 👥 Team
 
